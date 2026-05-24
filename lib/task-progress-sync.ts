@@ -13,7 +13,10 @@ export async function loadTaskProgress(
       );
 
   if (error) {
-    console.error(error);
+    console.error(
+      "LOAD TASK PROGRESS ERROR:",
+      error
+    );
 
     return [];
   }
@@ -28,7 +31,18 @@ export async function saveTaskProgress(
 
   completed: boolean
 ) {
-  const { error } =
+  console.log(
+    "Saving task progress:",
+    {
+      profileId,
+
+      taskId,
+
+      completed,
+    }
+  );
+
+  const { data, error } =
     await supabase
       .from("task_progress")
       .upsert(
@@ -50,9 +64,20 @@ export async function saveTaskProgress(
           onConflict:
             "profile_id,task_id",
         }
-      );
+      )
+      .select();
 
   if (error) {
-    console.error(error);
+    console.error(
+      "SAVE TASK PROGRESS ERROR:",
+      error
+    );
+
+    return;
   }
+
+  console.log(
+    "TASK SAVE SUCCESS:",
+    data
+  );
 }
