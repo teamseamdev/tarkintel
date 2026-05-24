@@ -9,6 +9,8 @@ import { User } from "@supabase/supabase-js";
 
 import { supabase } from "@/lib/supabase";
 
+import { ensureProfile } from "@/lib/profile-sync";
+
 export function useAuth() {
   const [user, setUser] =
     useState<User | null>(null);
@@ -23,7 +25,16 @@ export function useAuth() {
       } =
         await supabase.auth.getSession();
 
-      setUser(session?.user || null);
+      const authUser =
+        session?.user || null;
+
+      setUser(authUser);
+
+      if (authUser) {
+        await ensureProfile(
+          authUser
+        );
+      }
 
       setLoading(false);
     }
@@ -34,10 +45,20 @@ export function useAuth() {
       data: listener,
     } =
       supabase.auth.onAuthStateChange(
-        (_event, session) => {
-          setUser(
-            session?.user || null
-          );
+        async (
+          _event,
+          session
+        ) => {
+          const authUser =
+            session?.user || null;
+
+          setUser(authUser);
+
+          if (authUser) {
+            await ensureProfile(
+              authUser
+            );
+          }
         }
       );
 
