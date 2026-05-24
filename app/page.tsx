@@ -10,6 +10,8 @@ import {
   getRecommendedTasks,
 } from "@/lib/item-intelligence";
 
+import LoginButton from "@/components/login-button";
+
 export default function HomePage() {
   const { completedTasks } =
     useTaskProgress();
@@ -47,6 +49,25 @@ export default function HomePage() {
           <h1 className="text-3xl font-bold tracking-tight">
             TarkIntel
           </h1>
+        </div>
+
+        {/* Login */}
+        <div className="rounded-2xl border border-indigo-500/20 bg-indigo-500/5 p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-indigo-400">
+                Cloud Sync
+              </h2>
+
+              <p className="text-sm text-zinc-400">
+                Login with Discord to
+                sync progression across
+                devices
+              </p>
+            </div>
+
+            <LoginButton />
+          </div>
         </div>
 
         {/* Top Stats */}
@@ -197,7 +218,6 @@ export default function HomePage() {
                     </div>
                   </div>
 
-                  {/* Progress Bar */}
                   <div className="mt-3 h-2 overflow-hidden rounded-full bg-zinc-800">
                     <div
                       className="h-full rounded-full bg-blue-400 transition-all"
@@ -212,7 +232,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Recommended Next Tasks */}
+        {/* Recommended Tasks */}
         <div className="rounded-2xl border border-border bg-card p-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">
@@ -260,51 +280,9 @@ export default function HomePage() {
                       )}
                     </div>
                   </div>
-
-                  {/* Objectives Preview */}
-                  <div className="mt-3 flex flex-col gap-2">
-                    {task.objectives
-                      .slice(0, 2)
-                      .map(
-                        (
-                          objective
-                        ) => (
-                          <div
-                            key={
-                              objective
-                            }
-                            className="rounded-lg bg-black/20 px-3 py-2 text-sm text-zinc-400"
-                          >
-                            {
-                              objective
-                            }
-                          </div>
-                        )
-                      )}
-                  </div>
                 </div>
               )
             )}
-          </div>
-        </div>
-
-        {/* Raid Mode */}
-        <div className="rounded-2xl border border-green-500/20 bg-green-500/5 p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-semibold text-green-400">
-                Raid Mode
-              </h2>
-
-              <p className="text-sm text-zinc-400">
-                Fast item lookup
-                during raids
-              </p>
-            </div>
-
-            <button className="rounded-xl bg-green-500 px-4 py-2 text-sm font-medium text-black transition hover:bg-green-400">
-              Launch
-            </button>
           </div>
         </div>
       </div>
