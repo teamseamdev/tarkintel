@@ -20,11 +20,13 @@ export default function LoginButton() {
     );
   }
 
-  async function logout() {
-    await supabase.auth.signOut();
+async function logout() {
+  await supabase.auth.signOut();
 
-    setShowConfirm(false);
-  }
+  setShowConfirm(false);
+
+  window.location.reload();
+}
 
   if (user) {
     return (

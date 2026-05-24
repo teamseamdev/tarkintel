@@ -16,12 +16,16 @@ import { ensureProfile } from "@/lib/profile-sync";
 interface AuthContextType {
   user: User | null;
 
+  profile: any;
+
   loading: boolean;
 }
 
 const AuthContext =
   createContext<AuthContextType>({
     user: null,
+
+    profile: null,
 
     loading: true,
   });
@@ -33,6 +37,9 @@ export function AuthProvider({
 }) {
   const [user, setUser] =
     useState<User | null>(null);
+
+  const [profile, setProfile] =
+    useState<any>(null);
 
   const [loading, setLoading] =
     useState(true);
@@ -50,9 +57,16 @@ export function AuthProvider({
       setUser(authUser);
 
       if (authUser) {
-        await ensureProfile(
-          authUser
+        const createdProfile =
+          await ensureProfile(
+            authUser
+          );
+
+        setProfile(
+          createdProfile
         );
+      } else {
+        setProfile(null);
       }
 
       setLoading(false);
@@ -74,9 +88,16 @@ export function AuthProvider({
           setUser(authUser);
 
           if (authUser) {
-            await ensureProfile(
-              authUser
+            const createdProfile =
+              await ensureProfile(
+                authUser
+              );
+
+            setProfile(
+              createdProfile
             );
+          } else {
+            setProfile(null);
           }
         }
       );
@@ -90,6 +111,8 @@ export function AuthProvider({
     <AuthContext.Provider
       value={{
         user,
+
+        profile,
 
         loading,
       }}
