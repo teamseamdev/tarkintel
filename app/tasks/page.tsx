@@ -8,13 +8,30 @@ import { useTaskProgress } from "@/hooks/use-task-progress";
 
 export default function TasksPage() {
   const {
-    toggleTask,
-    isTaskCompleted,
-    completedTasks,
-  } = useTaskProgress();
+  toggleTask,
+  isTaskCompleted,
+  completedTasks,
+  loaded,
+} = useTaskProgress();
 
   const completedCount =
     completedTasks.length;
+
+if (!loaded) {
+  return (
+    <div className="min-h-screen bg-background p-4 text-white">
+      <div className="rounded-2xl border border-border bg-card p-6">
+        <h1 className="text-2xl font-bold">
+          Syncing Progress...
+        </h1>
+
+        <p className="mt-2 text-zinc-400">
+          Loading cloud progression.
+        </p>
+      </div>
+    </div>
+  );
+}
 
   return (
     <div className="min-h-screen bg-background p-4 pb-28 text-white">

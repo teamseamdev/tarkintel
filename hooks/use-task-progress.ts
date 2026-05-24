@@ -137,10 +137,12 @@ export function useTaskProgress() {
   }
 
   return {
-    completedTasks,
+  completedTasks,
 
-    toggleTask,
+  toggleTask,
 
-    isTaskCompleted,
-  };
+  isTaskCompleted,
+
+  loaded,
+};
 }
