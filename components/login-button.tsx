@@ -20,13 +20,26 @@ export default function LoginButton() {
     );
   }
 
-async function logout() {
-  await supabase.auth.signOut();
+  async function logout() {
+    try {
+      setShowConfirm(false);
 
-  setShowConfirm(false);
+      await supabase.auth.signOut({
+        scope: "local",
+      });
 
-  window.location.reload();
-}
+      localStorage.clear();
+
+      sessionStorage.clear();
+
+      window.location.href = "/";
+    } catch (error) {
+      console.error(
+        "Logout failed:",
+        error
+      );
+    }
+  }
 
   if (user) {
     return (
