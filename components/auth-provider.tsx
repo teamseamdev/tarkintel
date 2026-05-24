@@ -1,6 +1,8 @@
 "use client";
 
 import {
+  createContext,
+  useContext,
   useEffect,
   useState,
 } from "react";
@@ -11,7 +13,24 @@ import { supabase } from "@/lib/supabase";
 
 import { ensureProfile } from "@/lib/profile-sync";
 
-export function useAuth() {
+interface AuthContextType {
+  user: User | null;
+
+  loading: boolean;
+}
+
+const AuthContext =
+  createContext<AuthContextType>({
+    user: null,
+
+    loading: true,
+  });
+
+export function AuthProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [user, setUser] =
     useState<User | null>(null);
 
@@ -67,8 +86,19 @@ export function useAuth() {
     };
   }, []);
 
-  return {
-    user,
-    loading,
-  };
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+
+        loading,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  return useContext(AuthContext);
 }

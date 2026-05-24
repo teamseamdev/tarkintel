@@ -9,13 +9,17 @@ import "./globals.css";
 
 import { MobileNav } from "@/components/mobile-nav";
 
+import { AuthProvider } from "@/components/auth-provider";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
+
   subsets: ["latin"],
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
+
   subsets: ["latin"],
 });
 
@@ -37,11 +41,13 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
     >
       <body className="min-h-full bg-background text-foreground">
-        <main className="mx-auto max-w-lg">
-          {children}
-        </main>
+        <AuthProvider>
+          <main className="mx-auto max-w-lg">
+            {children}
+          </main>
 
-        <MobileNav />
+          <MobileNav />
+        </AuthProvider>
       </body>
     </html>
   );
