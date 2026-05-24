@@ -1,5 +1,8 @@
+import Link from "next/link";
+
 import {
   getTaskById,
+  getItemById,
 } from "@/lib/item-intelligence";
 
 interface TaskPageProps {
@@ -78,34 +81,49 @@ export default async function TaskPage({
 
               <div className="mt-4 flex flex-col gap-3">
                 {task.requiredItems.map(
-                  (item) => (
-                    <div
-                      key={item.item}
-                      className="flex items-center justify-between rounded-xl bg-zinc-900/50 p-3"
-                    >
-                      <div>
-                        <h3 className="font-medium">
-                          {item.item}
-                        </h3>
+                  (item) => {
+                    const itemData =
+                      getItemById(
+                        item.itemId
+                      );
 
-                        <p className="text-sm text-zinc-500">
-                          Quest Requirement
-                        </p>
-                      </div>
+                    return (
+                      <Link
+                        href={`/items/${item.itemId}`}
+                        key={
+                          item.itemId
+                        }
+                      >
+                        <div className="flex items-center justify-between rounded-xl bg-zinc-900/50 p-3 transition hover:bg-zinc-900">
+                          <div>
+                            <h3 className="font-medium">
+                              {itemData?.name ||
+                                item.itemId}
+                            </h3>
 
-                      <div className="flex items-center gap-2">
-                        {item.foundInRaid && (
-                          <div className="rounded-full bg-green-500/15 px-3 py-1 text-xs font-medium text-green-400">
-                            FIR
+                            <p className="text-sm text-zinc-500">
+                              Quest Requirement
+                            </p>
                           </div>
-                        )}
 
-                        <div className="rounded-full bg-blue-500/15 px-3 py-1 text-xs font-medium text-blue-400">
-                          x{item.amount}
+                          <div className="flex items-center gap-2">
+                            {item.foundInRaid && (
+                              <div className="rounded-full bg-green-500/15 px-3 py-1 text-xs font-medium text-green-400">
+                                FIR
+                              </div>
+                            )}
+
+                            <div className="rounded-full bg-blue-500/15 px-3 py-1 text-xs font-medium text-blue-400">
+                              x
+                              {
+                                item.amount
+                              }
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  )
+                      </Link>
+                    );
+                  }
                 )}
               </div>
             </div>
@@ -113,7 +131,8 @@ export default async function TaskPage({
 
         {/* Rewards */}
         {task.rewards &&
-          task.rewards.length > 0 && (
+          task.rewards.length >
+            0 && (
             <div className="rounded-2xl border border-border bg-card p-4">
               <h2 className="text-lg font-semibold">
                 Rewards
@@ -134,46 +153,39 @@ export default async function TaskPage({
             </div>
           )}
 
-        {/* Task Intelligence */}
-        <div className="rounded-2xl border border-purple-500/20 bg-purple-500/5 p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-semibold text-purple-400">
-                Task Intelligence
-              </h2>
+        {/* Task Info */}
+        <div className="grid grid-cols-3 gap-3">
+          <div className="rounded-2xl border border-border bg-card p-4">
+            <p className="text-xs text-zinc-500">
+              XP
+            </p>
 
-              <p className="text-sm text-zinc-400">
-                Progression Analysis
-              </p>
-            </div>
-
-            <div className="rounded-full bg-purple-500/15 px-3 py-1 text-xs font-medium text-purple-400">
-              ACTIVE
-            </div>
+            <h2 className="mt-1 text-xl font-bold text-green-400">
+              {task.xp?.toLocaleString()}
+            </h2>
           </div>
 
-          <div className="mt-4 grid grid-cols-2 gap-3">
-            <div className="rounded-xl bg-black/20 p-3">
-              <p className="text-xs text-zinc-500">
-                Trader
-              </p>
+          <div className="rounded-2xl border border-border bg-card p-4">
+            <p className="text-xs text-zinc-500">
+              Rep
+            </p>
 
-              <h3 className="mt-1 font-semibold">
-                {task.trader}
-              </h3>
-            </div>
+            <h2 className="mt-1 text-xl font-bold text-blue-400">
+              +
+              {task.reputation}
+            </h2>
+          </div>
 
-            <div className="rounded-xl bg-black/20 p-3">
-              <p className="text-xs text-zinc-500">
-                Kappa Required
-              </p>
+          <div className="rounded-2xl border border-border bg-card p-4">
+            <p className="text-xs text-zinc-500">
+              Level
+            </p>
 
-              <h3 className="mt-1 font-semibold">
-                {task.kappaRequired
-                  ? "YES"
-                  : "NO"}
-              </h3>
-            </div>
+            <h2 className="mt-1 text-xl font-bold text-yellow-400">
+              {
+                task.levelRequired
+              }
+            </h2>
           </div>
         </div>
       </div>

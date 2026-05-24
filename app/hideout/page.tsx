@@ -1,4 +1,5 @@
 import { hideoutModules } from "@/data/hideout/modules";
+import { getItemById } from "@/lib/item-intelligence";
 
 export default function HideoutPage() {
   return (
@@ -39,29 +40,37 @@ export default function HideoutPage() {
                 </div>
               </div>
 
-              {/* Required Items */}
+                            {/* Required Items */}
               <div className="mt-4 flex flex-col gap-3">
                 {module.requiredItems.map(
-                  (item) => (
-                    <div
-                      key={item.item}
-                      className="flex items-center justify-between rounded-xl bg-zinc-900/50 p-3"
-                    >
-                      <div>
-                        <h3 className="font-medium">
-                          {item.item}
-                        </h3>
+                  (item) => {
+                    const itemData =
+                      getItemById(
+                        item.itemId
+                      );
 
-                        <p className="text-sm text-zinc-500">
-                          Hideout Upgrade
-                        </p>
-                      </div>
+                    return (
+                      <div
+                        key={item.itemId}
+                        className="flex items-center justify-between rounded-xl bg-zinc-900/50 p-3"
+                      >
+                        <div>
+                          <h3 className="font-medium">
+                            {itemData?.name ||
+                              item.itemId}
+                          </h3>
 
-                      <div className="rounded-full bg-green-500/15 px-3 py-1 text-xs font-medium text-green-400">
-                        x{item.amount}
+                          <p className="text-sm text-zinc-500">
+                            Hideout Upgrade
+                          </p>
+                        </div>
+
+                        <div className="rounded-full bg-green-500/15 px-3 py-1 text-xs font-medium text-green-400">
+                          x{item.amount}
+                        </div>
                       </div>
-                    </div>
-                  )
+                    );
+                  }
                 )}
               </div>
             </div>

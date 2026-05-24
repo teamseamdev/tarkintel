@@ -86,20 +86,22 @@ export default function HomePage() {
 
           <div className="mt-4 flex flex-col gap-3">
             {upcomingItems.map(
-              ([item, amount], index) => (
+              (
+                { item, amount },
+                index
+              ) => (
                 <div
-                  key={`${item}-${amount}-${index}`}
+                  key={`${item.id}-${amount}-${index}`}
                   className="flex items-center justify-between rounded-xl bg-zinc-900/50 p-3"
                 >
                   <div>
                     <h3 className="font-medium">
-                      {typeof item === "string"
-                        ? item
-                        : item?.name}
+                      {item.name}
                     </h3>
 
                     <p className="text-sm text-zinc-500">
-                      Needed for future quests
+                      Needed for future
+                      quests
                     </p>
                   </div>
 
@@ -163,39 +165,50 @@ export default function HomePage() {
           </div>
 
           <div className="mt-4 flex flex-col gap-3">
-            {traderProgress.map((trader) => (
-              <div
-                key={trader.trader}
-                className="rounded-xl bg-zinc-900/50 p-3"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium">
-                      {trader.trader}
-                    </h3>
+            {traderProgress.map(
+              (trader) => (
+                <div
+                  key={trader.trader}
+                  className="rounded-xl bg-zinc-900/50 p-3"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-medium">
+                        {
+                          trader.trader
+                        }
+                      </h3>
 
-                    <p className="text-sm text-zinc-500">
-                      {trader.completed} /{" "}
-                      {trader.total} Tasks
-                    </p>
+                      <p className="text-sm text-zinc-500">
+                        {
+                          trader.completed
+                        }{" "}
+                        /{" "}
+                        {trader.total}{" "}
+                        Tasks
+                      </p>
+                    </div>
+
+                    <div className="rounded-full bg-blue-500/15 px-3 py-1 text-xs font-medium text-blue-400">
+                      {
+                        trader.percentage
+                      }
+                      %
+                    </div>
                   </div>
 
-                  <div className="rounded-full bg-blue-500/15 px-3 py-1 text-xs font-medium text-blue-400">
-                    {trader.percentage}%
+                  {/* Progress Bar */}
+                  <div className="mt-3 h-2 overflow-hidden rounded-full bg-zinc-800">
+                    <div
+                      className="h-full rounded-full bg-blue-400 transition-all"
+                      style={{
+                        width: `${trader.percentage}%`,
+                      }}
+                    />
                   </div>
                 </div>
-
-                {/* Progress Bar */}
-                <div className="mt-3 h-2 overflow-hidden rounded-full bg-zinc-800">
-                  <div
-                    className="h-full rounded-full bg-blue-400 transition-all"
-                    style={{
-                      width: `${trader.percentage}%`,
-                    }}
-                  />
-                </div>
-              </div>
-            ))}
+              )
+            )}
           </div>
         </div>
 
@@ -203,7 +216,8 @@ export default function HomePage() {
         <div className="rounded-2xl border border-border bg-card p-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">
-              Recommended Next Tasks
+              Recommended Next
+              Tasks
             </h2>
 
             <span className="text-sm text-zinc-500">
@@ -212,54 +226,65 @@ export default function HomePage() {
           </div>
 
           <div className="mt-4 flex flex-col gap-3">
-            {recommendedTasks.map((task) => (
-              <div
-                key={task.id}
-                className="rounded-xl bg-zinc-900/50 p-3"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium">
-                      {task.name}
-                    </h3>
+            {recommendedTasks.map(
+              (task) => (
+                <div
+                  key={task.id}
+                  className="rounded-xl bg-zinc-900/50 p-3"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-medium">
+                        {task.name}
+                      </h3>
 
-                    <p className="text-sm text-zinc-500">
-                      {task.trader}
-                    </p>
+                      <p className="text-sm text-zinc-500">
+                        {task.trader}
+                      </p>
+                    </div>
+
+                    <div className="flex gap-2">
+                      {task.kappaRequired && (
+                        <div className="rounded-full bg-yellow-500/15 px-3 py-1 text-xs font-medium text-yellow-400">
+                          KAPPA
+                        </div>
+                      )}
+
+                      {task.requiredItems?.some(
+                        (item) =>
+                          item.foundInRaid
+                      ) && (
+                        <div className="rounded-full bg-green-500/15 px-3 py-1 text-xs font-medium text-green-400">
+                          FIR
+                        </div>
+                      )}
+                    </div>
                   </div>
 
-                  <div className="flex gap-2">
-                    {task.kappaRequired && (
-                      <div className="rounded-full bg-yellow-500/15 px-3 py-1 text-xs font-medium text-yellow-400">
-                        KAPPA
-                      </div>
-                    )}
-
-                    {task.requiredItems?.some(
-                      (item) => item.foundInRaid
-                    ) && (
-                      <div className="rounded-full bg-green-500/15 px-3 py-1 text-xs font-medium text-green-400">
-                        FIR
-                      </div>
-                    )}
+                  {/* Objectives Preview */}
+                  <div className="mt-3 flex flex-col gap-2">
+                    {task.objectives
+                      .slice(0, 2)
+                      .map(
+                        (
+                          objective
+                        ) => (
+                          <div
+                            key={
+                              objective
+                            }
+                            className="rounded-lg bg-black/20 px-3 py-2 text-sm text-zinc-400"
+                          >
+                            {
+                              objective
+                            }
+                          </div>
+                        )
+                      )}
                   </div>
                 </div>
-
-                {/* Objectives Preview */}
-                <div className="mt-3 flex flex-col gap-2">
-                  {task.objectives
-                    .slice(0, 2)
-                    .map((objective) => (
-                      <div
-                        key={objective}
-                        className="rounded-lg bg-black/20 px-3 py-2 text-sm text-zinc-400"
-                      >
-                        {objective}
-                      </div>
-                    ))}
-                </div>
-              </div>
-            ))}
+              )
+            )}
           </div>
         </div>
 
@@ -272,7 +297,8 @@ export default function HomePage() {
               </h2>
 
               <p className="text-sm text-zinc-400">
-                Fast item lookup during raids
+                Fast item lookup
+                during raids
               </p>
             </div>
 
