@@ -14,7 +14,7 @@ import {
   getKappaProgress,
   getTraderProgress,
   getRemainingKappaTasks,
-} from "@/lib/item-intelligence";
+} from "@/lib/profile-analytics";
 
 import { TarkovTask } from "@/types/task";
 

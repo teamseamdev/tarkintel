@@ -15,8 +15,7 @@ import { sortTasksByPriority } from "@/lib/task-priority";
 import { filterTasks } from "@/lib/filter-tasks";
 
 import { buildProgressionState } from "@/lib/build-progression-state";
-
-import { getLevelFromXP } from "@/lib/player-level";
+import { getEffectivePlayerLevel } from "@/lib/effective-level";
 
 import { TaskFilter } from "@/types/task-filter";
 
@@ -27,44 +26,16 @@ import { TaskCard } from "@/components/tasks/TaskCard";
 
 
 export default function TasksPage() {
-  const {
-    toggleTask,
-    isTaskCompleted,
-    completedTasks,
-    loaded,
-  } = useTaskProgress();
+const {
+  completedTasks,
+  toggleTask,
+  isTaskCompleted,
+  loaded,
+  playerLevelOverride,
+  setPlayerLevelOverride,
+} = useTaskProgress();
 
-  /*
-    PLAYER LEVEL
-  */
-
-  const [
-    playerLevel,
-    setPlayerLevel,
-  ] = useState<number>(() => {
-    if (
-      typeof window !==
-      "undefined"
-    ) {
-      const saved =
-        localStorage.getItem(
-          "tarkintel-pmc-level"
-        );
-
-      if (saved) {
-        return Number(saved);
-      }
-    }
-
-    return 1;
-  });
-
-  useEffect(() => {
-    localStorage.setItem(
-      "tarkintel-pmc-level",
-      String(playerLevel)
-    );
-  }, [playerLevel]);
+ 
 
   /*
     TASK STATE
@@ -122,42 +93,15 @@ export default function TasksPage() {
     INFERRED XP
   */
 
-  const inferredXP =
-    completedTasks.reduce(
-      (total, taskId) => {
-        const task =
-          tasks.find(
-            (task) =>
-              task.id === taskId
-          );
-
-        return (
-          total +
-          (task?.xp || 0)
-        );
-      },
-      0
-    );
-
-  /*
-    INFERRED LEVEL
-  */
-
-  const inferredLevel =
-    getLevelFromXP(
-      inferredXP
-    );
-
-  /*
-    EFFECTIVE LEVEL
-  */
-
-  const effectiveLevel =
-    Math.max(
-      inferredLevel,
-      playerLevel
-    );
-
+const {
+  inferredLevel,
+  effectiveLevel,
+} =
+  getEffectivePlayerLevel(
+    tasks,
+    completedTasks,
+    playerLevelOverride
+  );
   /*
     PROGRESSION ENGINE
   */
@@ -355,76 +299,81 @@ export default function TasksPage() {
   visibleCount={sortedTasks.length}
 />
 
-        {/* Player State */}
-        <div className="glass-card rounded-[2rem] p-5">
-          <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="text-sm text-zinc-500">
-                PMC Level
-              </p>
+       {/* Player State */}
+<div className="glass-card rounded-[2rem] p-5">
+  <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+    {/* Current Effective Level */}
+    <div>
+      <p className="text-sm text-zinc-500">
+        PMC Level
+      </p>
 
-              <h2 className="mt-2 text-5xl font-black text-primary">
-                {effectiveLevel}
-              </h2>
+      <h2 className="mt-2 text-5xl font-black text-primary">
+        {effectiveLevel}
+      </h2>
 
-              <p className="mt-2 text-sm text-zinc-500">
-                Used for progression
-                intelligence and
-                level-gated tasks.
-              </p>
-            </div>
+      <p className="mt-2 text-sm text-zinc-500">
+        Used for progression
+        intelligence and
+        level-gated tasks.
+      </p>
+    </div>
 
-            <form
-              onSubmit={(
-                event
-              ) => {
-                event.preventDefault();
+    {/* Manual Override */}
+    <div className="flex flex-col gap-3">
+      <p className="text-sm text-zinc-500">
+        Set Your PMC Level
+      </p>
 
-                const clampedLevel =
-                  Math.max(
-                    inferredLevel,
-                    Math.min(
-                      79,
-                      Number(
-                        playerLevel
-                      ) || 1
-                    )
-                  );
+      <p className="text-xs text-zinc-500">
+        Inferred Level:{" "}
+        {inferredLevel}
+      </p>
 
-                setPlayerLevel(
-                  clampedLevel
-                );
-              }}
-              className="flex flex-col gap-3"
-            >
-              <p className="text-sm text-zinc-500">
-                Set Your PMC Level
-              </p>
+      <input
+        type="number"
+        min={1}
+        max={79}
+        value={
+          playerLevelOverride ||
+          inferredLevel
+        }
+        onChange={(event) => {
+          const value =
+            Number(
+              event.target.value
+            ) || 1;
 
-              <p className="mt-1 text-xs text-zinc-500">
-                Inferred Level:{" "}
-                {inferredLevel}
-              </p>
+          /*
+            NEVER ALLOW
+            BELOW INFERRED
+          */
 
-              <input
-                type="number"
-                min={1}
-                max={79}
-                value={playerLevel}
-                onChange={(
-                  event
-                ) =>
-                  setPlayerLevel(
-                    Number(
-                      event.target.value
-                    ) || 1
-                  )
-                }
-                className="w-32 rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-3 text-lg text-white outline-none transition-all duration-300 focus:border-primary"
-              />
-            </form>
-          </div>
-        </div>
+          const clampedLevel =
+            Math.max(
+              inferredLevel,
+              Math.min(
+                79,
+                value
+              )
+            );
+
+          setPlayerLevelOverride(
+            clampedLevel
+          );
+        }}
+        className="w-32 rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-3 text-lg text-white outline-none transition-all duration-300 focus:border-primary"
+      />
+
+      <p className="text-xs text-zinc-600">
+        Effective level always
+        uses the higher of:
+        inferred progression or
+        manual override.
+      </p>
+    </div>
+  </div>
+</div>
 
         {/* Search */}
         <div className="glass-card rounded-[2rem] p-4">

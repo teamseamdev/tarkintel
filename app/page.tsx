@@ -12,8 +12,7 @@ import { useTaskProgress } from "@/hooks/use-task-progress";
 
 import { buildProgressionState } from "@/lib/build-progression-state";
 import LoginButton from "@/components/login-button";
-import { getLevelFromXP } from "@/lib/player-level";
-
+import { getEffectivePlayerLevel } from "@/lib/effective-level";
 export default function HomePage() {
   const {
   completedTasks,
@@ -45,36 +44,13 @@ export default function HomePage() {
     loadTasks();
   }, []);
 
-const inferredXP =
-  completedTasks.reduce(
-    (
-      total,
-      taskId
-    ) => {
-      const task =
-        tasks.find(
-          (t) =>
-            t.id === taskId
-        );
-
-      return (
-        total +
-        (task?.xp || 0)
-      );
-    },
-    0
-  );
-
-const inferredLevel =
-  getLevelFromXP(
-    inferredXP
-  );
-
-const effectiveLevel =
-  Math.max(
-    inferredLevel,
-    playerLevelOverride ||
-      1
+const {
+  effectiveLevel,
+} =
+  getEffectivePlayerLevel(
+    tasks,
+    completedTasks,
+    playerLevelOverride
   );
 
 /*

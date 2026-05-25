@@ -84,16 +84,3 @@ export async function getItemPriority(
 
   return "LOW";
 }
-
-import { items } from "@/data/items/items";
-
-export function getItemById(
-  id: string
-) {
-  return Object.values(
-    items
-  ).find(
-    (item) =>
-      item.id === id
-  );
-}
