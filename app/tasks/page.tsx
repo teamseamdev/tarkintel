@@ -330,40 +330,57 @@ const {
         {inferredLevel}
       </p>
 
-      <input
-        type="number"
-        min={1}
-        max={79}
-        value={
-          playerLevelOverride ||
-          inferredLevel
-        }
-        onChange={(event) => {
-          const value =
-            Number(
-              event.target.value
-            ) || 1;
+     <input
+  type="number"
+  min={inferredLevel}
+  max={79}
+  value={
+    playerLevelOverride ??
+    inferredLevel
+  }
+  onChange={(event) => {
+    const rawValue =
+      event.target.value;
 
-          /*
-            NEVER ALLOW
-            BELOW INFERRED
-          */
+    /*
+      ALLOW EMPTY
+      DURING EDITING
+    */
 
-          const clampedLevel =
-            Math.max(
-              inferredLevel,
-              Math.min(
-                79,
-                value
-              )
-            );
+    if (!rawValue) {
+      return;
+    }
 
-          setPlayerLevelOverride(
-            clampedLevel
-          );
-        }}
-        className="w-32 rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-3 text-lg text-white outline-none transition-all duration-300 focus:border-primary"
-      />
+    const parsedValue =
+      Number(rawValue);
+
+    if (
+      Number.isNaN(
+        parsedValue
+      )
+    ) {
+      return;
+    }
+
+    /*
+      CLAMP
+    */
+
+    const clampedLevel =
+      Math.max(
+        inferredLevel,
+        Math.min(
+          79,
+          parsedValue
+        )
+      );
+
+    setPlayerLevelOverride(
+      clampedLevel
+    );
+  }}
+  className="w-32 rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-3 text-lg text-white outline-none transition-all duration-300 focus:border-primary"
+/>
 
       <p className="text-xs text-zinc-600">
         Effective level always
