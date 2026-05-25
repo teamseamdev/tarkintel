@@ -202,25 +202,25 @@ export default function ItemsPage() {
                               </div>
                             )}
 
-                            <div
-                              className={`rounded-full px-3 py-1 text-xs font-medium ${
-                                item.avgPrice >
-                                50000
-                                  ? "bg-red-500/15 text-red-400"
-                                  : item.avgPrice >
-                                    20000
-                                  ? "bg-yellow-500/15 text-yellow-400"
-                                  : "bg-green-500/15 text-green-400"
-                              }`}
-                            >
-                              {item.avgPrice >
-                              50000
-                                ? "HIGH VALUE"
-                                : item.avgPrice >
-                                  20000
-                                ? "MED VALUE"
-                                : "LOW VALUE"}
-                            </div>
+                           <div
+  className={`rounded-full px-3 py-1 text-xs font-medium ${
+    (item.avgPrice || 0) >
+    50000
+      ? "bg-red-500/15 text-red-400"
+      : (item.avgPrice || 0) >
+        20000
+      ? "bg-yellow-500/15 text-yellow-400"
+      : "bg-green-500/15 text-green-400"
+  }`}
+>
+  {(item.avgPrice || 0) >
+  50000
+    ? "HIGH VALUE"
+    : (item.avgPrice || 0) >
+      20000
+    ? "MED VALUE"
+    : "LOW VALUE"}
+</div>
                           </div>
                         </div>
                       </div>
