@@ -90,27 +90,28 @@ export default async function TasksV3Page() {
                     </div>
                   </div>
 
+                  {/* Objectives */}
                   <div className="mt-5 flex flex-col gap-2">
                     {task.objectives
-                      .slice(0, 2)
+                      ?.slice(0, 2)
                       .map(
                         (
-                          objective: string
+                          objective: any,
+                          index: number
                         ) => (
                           <div
-                            key={
-                              objective
-                            }
+                            key={`${task.id}-objective-${index}`}
                             className="rounded-2xl border border-white/5 bg-white/[0.03] px-4 py-3 text-sm text-zinc-300"
                           >
-                            {
-                              objective
-                            }
+                            •{" "}
+                            {objective.description ||
+                              "Objective"}
                           </div>
                         )
                       )}
                   </div>
 
+                  {/* Maps */}
                   <div className="mt-5 flex flex-wrap gap-2">
                     {task.maps?.map(
                       (
