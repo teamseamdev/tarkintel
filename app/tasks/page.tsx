@@ -330,57 +330,63 @@ const {
         {inferredLevel}
       </p>
 
-     <input
-  type="number"
-  min={inferredLevel}
-  max={79}
-  value={
-    playerLevelOverride ??
-    inferredLevel
-  }
-  onChange={(event) => {
-    const rawValue =
-      event.target.value;
+      <input
+        type="text"
+        inputMode="numeric"
+        pattern="[0-9]*"
+        value={
+          playerLevelOverride?.toString() ??
+          effectiveLevel.toString()
+        }
+        onChange={(event) => {
+          const raw =
+            event.target.value.replace(
+              /[^0-9]/g,
+              ""
+            );
 
-    /*
-      ALLOW EMPTY
-      DURING EDITING
-    */
+          /*
+            ALLOW EMPTY
+            DURING MOBILE EDITING
+          */
 
-    if (!rawValue) {
-      return;
-    }
+          if (raw === "") {
+            return;
+          }
 
-    const parsedValue =
-      Number(rawValue);
+          const parsed =
+            parseInt(
+              raw,
+              10
+            );
 
-    if (
-      Number.isNaN(
-        parsedValue
-      )
-    ) {
-      return;
-    }
+          if (
+            Number.isNaN(
+              parsed
+            )
+          ) {
+            return;
+          }
 
-    /*
-      CLAMP
-    */
+          /*
+            CLAMP
+          */
 
-    const clampedLevel =
-      Math.max(
-        inferredLevel,
-        Math.min(
-          79,
-          parsedValue
-        )
-      );
+          const clamped =
+            Math.max(
+              inferredLevel,
+              Math.min(
+                79,
+                parsed
+              )
+            );
 
-    setPlayerLevelOverride(
-      clampedLevel
-    );
-  }}
-  className="w-32 rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-3 text-lg text-white outline-none transition-all duration-300 focus:border-primary"
-/>
+          setPlayerLevelOverride(
+            clamped
+          );
+        }}
+        className="w-32 rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-3 text-lg text-white outline-none transition-all duration-300 focus:border-primary"
+      />
 
       <p className="text-xs text-zinc-600">
         Effective level always

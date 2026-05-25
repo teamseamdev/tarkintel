@@ -45,34 +45,65 @@ export function AuthProvider({
     useState(true);
 
   useEffect(() => {
+    let mounted = true;
+
     async function loadUser() {
-      const {
-        data: { session },
-      } =
-        await supabase.auth.getSession();
+      try {
+        setLoading(true);
 
-      const authUser =
-        session?.user || null;
+        const {
+          data: { session },
+        } =
+          await supabase.auth.getSession();
 
-      setUser(authUser);
+        if (!mounted) {
+          return;
+        }
 
-      if (authUser) {
-        const createdProfile =
-          await ensureProfile(
-            authUser
+        const authUser =
+          session?.user || null;
+
+        setUser(authUser);
+
+        if (authUser) {
+          const createdProfile =
+            await ensureProfile(
+              authUser
+            );
+
+          if (!mounted) {
+            return;
+          }
+
+          setProfile(
+            createdProfile
           );
-
-        setProfile(
-          createdProfile
+        } else {
+          setProfile(null);
+        }
+      } catch (error) {
+        console.error(
+          "AUTH LOAD ERROR:",
+          error
         );
-      } else {
-        setProfile(null);
-      }
 
-      setLoading(false);
+        if (mounted) {
+          setProfile(null);
+
+          setUser(null);
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
     }
 
     loadUser();
+
+    /*
+      LIVE AUTH CHANGES
+    */
 
     const {
       data: listener,
@@ -82,27 +113,57 @@ export function AuthProvider({
           _event,
           session
         ) => {
-          const authUser =
-            session?.user || null;
+          try {
+            if (!mounted) {
+              return;
+            }
 
-          setUser(authUser);
+            setLoading(true);
 
-          if (authUser) {
-            const createdProfile =
-              await ensureProfile(
-                authUser
+            const authUser =
+              session?.user ||
+              null;
+
+            setUser(authUser);
+
+            if (authUser) {
+              const createdProfile =
+                await ensureProfile(
+                  authUser
+                );
+
+              if (!mounted) {
+                return;
+              }
+
+              setProfile(
+                createdProfile
               );
-
-            setProfile(
-              createdProfile
+            } else {
+              setProfile(null);
+            }
+          } catch (error) {
+            console.error(
+              "AUTH STATE ERROR:",
+              error
             );
-          } else {
-            setProfile(null);
+
+            if (mounted) {
+              setProfile(null);
+
+              setUser(null);
+            }
+          } finally {
+            if (mounted) {
+              setLoading(false);
+            }
           }
         }
       );
 
     return () => {
+      mounted = false;
+
       listener.subscription.unsubscribe();
     };
   }, []);
@@ -123,5 +184,7 @@ export function AuthProvider({
 }
 
 export function useAuth() {
-  return useContext(AuthContext);
+  return useContext(
+    AuthContext
+  );
 }
