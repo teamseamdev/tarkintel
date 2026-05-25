@@ -1,7 +1,10 @@
-import { allTasks } from "@/data/tasks";
 import { hideoutModules } from "@/data/hideout/modules";
 
 import { items } from "@/data/items/items";
+
+/*
+  ITEM LOOKUPS
+*/
 
 export function getItemById(
   itemId: string
@@ -9,44 +12,33 @@ export function getItemById(
   return items[itemId];
 }
 
-export function getTasksByItem(
-  itemId: string
-) {
-  return allTasks.filter((task) =>
-    task.requiredItems?.some(
-      (item) =>
-        item.itemId === itemId
-    )
-  );
-}
+/*
+  ITEM PRIORITY
+  TEMPORARILY SIMPLIFIED
+  UNTIL LIVE ITEM →
+  TASK RELATIONSHIPS
+  ARE IMPLEMENTED
+*/
 
 export function getItemPriority(
   itemId: string
 ) {
-  const relatedTasks =
-    getTasksByItem(itemId);
+  /*
+    HIDEOUT VALUE
+  */
 
-  const kappaTasks =
-    relatedTasks.filter(
-      (task) => task.kappaRequired
-    );
-
-  const firTasks =
-    relatedTasks.filter((task) =>
-      task.requiredItems?.some(
-        (item) =>
-          item.itemId === itemId &&
-          item.foundInRaid
-      )
-    );
+  const hideoutUsage =
+    hideoutModules.filter(
+      (module) =>
+        module.requiredItems.some(
+          (item) =>
+            item.itemId === itemId
+        )
+    ).length;
 
   let score = 0;
 
-  score += relatedTasks.length * 2;
-
-  score += kappaTasks.length * 3;
-
-  score += firTasks.length * 2;
+  score += hideoutUsage * 2;
 
   if (score >= 10)
     return "EXTREMELY HIGH";
@@ -60,10 +52,16 @@ export function getItemPriority(
   return "LOW";
 }
 
+/*
+  ITEM SEARCH
+*/
+
 export function getAllUniqueItems() {
   return Object.values(items).sort(
     (a, b) =>
-      a.name.localeCompare(b.name)
+      a.name.localeCompare(
+        b.name
+      )
   );
 }
 
@@ -84,61 +82,30 @@ export function searchItems(
   );
 }
 
-export function getUpcomingItems(
-  completedTaskIds: string[]
+/*
+  LIVE KAPPA TASKS
+*/
+
+export function getKappaTasks(
+  tasks: any[]
 ) {
-  const remainingTasks =
-    allTasks.filter(
-      (task) =>
-        !completedTaskIds.includes(
-          task.id
-        )
-    );
-
-  const itemMap = new Map<
-    string,
-    number
-  >();
-
-  remainingTasks.forEach((task) => {
-    task.requiredItems?.forEach(
-      (item) => {
-        const current =
-          itemMap.get(item.itemId) || 0;
-
-        itemMap.set(
-          item.itemId,
-          current + item.amount
-        );
-      }
-    );
-  });
-
-  return Array.from(itemMap.entries())
-    .map(([itemId, amount]) => ({
-      item: items[itemId],
-      amount,
-    }))
-    .filter(
-      (entry) => entry.item
-    )
-    .sort(
-      (a, b) =>
-        b.amount - a.amount
-    )
-    .slice(0, 8);
-}
-
-export function getKappaTasks() {
-  return allTasks.filter(
-    (task) => task.kappaRequired
+  return tasks.filter(
+    (task) =>
+      task.kappaRequired
   );
 }
 
+/*
+  REMAINING KAPPA TASKS
+*/
+
 export function getRemainingKappaTasks(
+  tasks: any[],
   completedTaskIds: string[]
 ) {
-  return getKappaTasks().filter(
+  return getKappaTasks(
+    tasks
+  ).filter(
     (task) =>
       !completedTaskIds.includes(
         task.id
@@ -146,11 +113,16 @@ export function getRemainingKappaTasks(
   );
 }
 
+/*
+  KAPPA PROGRESS
+*/
+
 export function getKappaProgress(
+  tasks: any[],
   completedTaskIds: string[]
 ) {
   const kappaTasks =
-    getKappaTasks();
+    getKappaTasks(tasks);
 
   const completed =
     kappaTasks.filter((task) =>
@@ -172,25 +144,39 @@ export function getKappaProgress(
 
   return {
     completed,
+
     total,
+
     percentage,
   };
 }
 
+/*
+  LIVE TRADER PROGRESSION
+*/
+
 export function getTraderProgress(
+  tasks: any[],
   completedTaskIds: string[]
 ) {
   const traderMap = new Map<
     string,
     {
       completed: number;
+
       total: number;
     }
   >();
 
-  allTasks.forEach((task) => {
+  tasks.forEach((task) => {
+    if (!task.trader) {
+      return;
+    }
+
     const existing =
-      traderMap.get(task.trader);
+      traderMap.get(
+        task.trader
+      );
 
     const completed =
       completedTaskIds.includes(
@@ -218,85 +204,36 @@ export function getTraderProgress(
 
   return Array.from(
     traderMap.entries()
-  ).map(([trader, stats]) => ({
-    trader,
+  )
+    .map(
+      ([trader, stats]) => ({
+        trader,
 
-    completed:
-      stats.completed,
+        completed:
+          stats.completed,
 
-    total: stats.total,
+        total: stats.total,
 
-    percentage:
-      stats.total > 0
-        ? Math.round(
-            (stats.completed /
-              stats.total) *
-              100
-          )
-        : 0,
-  }));
-}
-
-export function getRecommendedTasks(
-  completedTaskIds: string[]
-) {
-  const incompleteTasks =
-    allTasks.filter(
-      (task) =>
-        !completedTaskIds.includes(
-          task.id
-        )
+        percentage:
+          stats.total > 0
+            ? Math.round(
+                (stats.completed /
+                  stats.total) *
+                  100
+              )
+            : 0,
+      })
+    )
+    .sort(
+      (a, b) =>
+        b.completed -
+        a.completed
     );
-
-  return incompleteTasks
-    .sort((a, b) => {
-      let scoreA = 0;
-      let scoreB = 0;
-
-      if (a.kappaRequired)
-        scoreA += 5;
-
-      if (b.kappaRequired)
-        scoreB += 5;
-
-      if (
-        a.requiredItems?.some(
-          (item) =>
-            item.foundInRaid
-        )
-      ) {
-        scoreA += 2;
-      }
-
-      if (
-        b.requiredItems?.some(
-          (item) =>
-            item.foundInRaid
-        )
-      ) {
-        scoreB += 2;
-      }
-
-      scoreA +=
-        10 -
-        (a.levelRequired || 1);
-
-      scoreB +=
-        10 -
-        (b.levelRequired || 1);
-
-      return scoreB - scoreA;
-    })
-    .slice(0, 5);
 }
 
-export function getTaskById(
-  id: string
-) {
-  return allTasks.find(
-    (task) => task.id === id
-  );
-}
+/*
+  ITEM SLUGS
+*/
 
 export function createItemSlug(
   itemId: string
@@ -309,6 +246,10 @@ export function getItemBySlug(
 ) {
   return items[slug];
 }
+
+/*
+  HIDEOUT
+*/
 
 export function getHideoutItems() {
   const itemMap = new Map<
@@ -340,6 +281,7 @@ export function getHideoutItems() {
   )
     .map(([itemId, amount]) => ({
       item: items[itemId],
+
       amount,
     }))
     .filter(

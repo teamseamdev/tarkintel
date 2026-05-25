@@ -2,18 +2,15 @@
 
 import Link from "next/link";
 
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+
 import { useTaskProgress } from "@/hooks/use-task-progress";
 
-import {
-  getUpcomingItems,
-  getKappaProgress,
-  getRemainingKappaTasks,
-  getTraderProgress,
-} from "@/lib/item-intelligence";
-
-import { getRecommendedTasks } from "@/lib/recommended-tasks";
-
-import LoginButton from "@/components/login-button";
+import { buildProgressionState } from "@/lib/build-progression-state";
 
 export default function HomePage() {
   const {
@@ -21,329 +18,278 @@ export default function HomePage() {
     loaded,
   } = useTaskProgress();
 
-  if (!loaded) {
-    return (
-      <div className="min-h-screen bg-background p-4 text-white">
-        <div className="rounded-2xl border border-border bg-card p-6">
-          <h1 className="text-2xl font-bold">
-            Syncing Progress...
-          </h1>
+  const [tasks, setTasks] =
+    useState<any[]>([]);
 
-          <p className="mt-2 text-zinc-400">
-            Loading cloud progression.
-          </p>
+  const [loading, setLoading] =
+    useState(true);
+
+  useEffect(() => {
+    async function loadTasks() {
+      const response =
+        await fetch(
+          "/api/tasks"
+        );
+
+      const data =
+        await response.json();
+
+      setTasks(data);
+
+      setLoading(false);
+    }
+
+    loadTasks();
+  }, []);
+
+  const progression =
+    useMemo(() => {
+      return buildProgressionState(
+        tasks,
+        completedTasks
+      );
+    }, [
+      tasks,
+      completedTasks,
+    ]);
+
+  if (!loaded || loading) {
+    return (
+      <div className="min-h-screen p-6 text-white">
+        <div className="glass-card rounded-3xl p-6">
+          Loading TarkIntel...
         </div>
       </div>
     );
   }
 
-  const upcomingItems =
-    getUpcomingItems(
-      completedTasks
-    );
-
-  const kappaProgress =
-    getKappaProgress(
-      completedTasks
-    );
-
-  const remainingKappaTasks =
-    getRemainingKappaTasks(
-      completedTasks
-    ).slice(0, 5);
-
-  const traderProgress =
-    getTraderProgress(
-      completedTasks
-    );
-
-  const recommendedTasks =
-    getRecommendedTasks(
-      completedTasks
-    );
-
   return (
-    <div className="min-h-screen bg-background p-4 pb-28 text-white">
+    <div className="min-h-screen p-6 pb-28 text-white">
       <div className="flex flex-col gap-6">
-        {/* Header */}
-        <div>
-          <p className="text-sm text-zinc-500">
-            Escape From Tarkov
-            Companion
-          </p>
+        {/* HERO */}
+        <div className="glass-card relative overflow-hidden rounded-[2rem] p-8">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#B8895A]/10 to-transparent" />
 
-          <h1 className="text-3xl font-bold tracking-tight">
-            TarkIntel
-          </h1>
+          <div className="relative z-10">
+            <p className="text-sm uppercase tracking-[0.3em] text-zinc-500">
+              TarkIntel
+            </p>
+
+            <h1 className="mt-3 text-5xl font-black tracking-tight">
+              Escape From Tarkov
+              Progression
+              Intelligence
+            </h1>
+
+            <p className="mt-4 max-w-xl text-zinc-400">
+              Real-time task
+              progression tracking
+              powered by live
+              Tarkov.dev data.
+            </p>
+          </div>
         </div>
 
-        {/* Login */}
-        <div className="rounded-2xl border border-indigo-500/20 bg-indigo-500/5 p-4">
-          <div className="flex items-center justify-between">
+      {/* PROGRESSION OVERVIEW */}
+<div className="grid grid-cols-2 gap-4">
+  {/* Overall Completion */}
+  <div className="glass-card rounded-[2rem] p-5">
+    <p className="text-sm text-zinc-500">
+      Overall Progress
+    </p>
+
+    <div className="mt-4">
+      <div className="flex items-center justify-between text-sm">
+        <span className="text-zinc-400">
+          Task Completion
+        </span>
+
+        <span className="font-semibold text-primary">
+          {Math.round(
+            (progression.completed
+              .length /
+              tasks.length) *
+              100
+          )}
+          %
+        </span>
+      </div>
+
+      <div className="mt-3 h-3 overflow-hidden rounded-full bg-white/5">
+        <div
+          className="h-full rounded-full bg-gradient-to-r from-[#B8895A] to-[#D4A574]"
+          style={{
+            width: `${
+              (progression
+                .completed
+                .length /
+                tasks.length) *
+              100
+            }%`,
+          }}
+        />
+      </div>
+    </div>
+  </div>
+
+  {/* Kappa */}
+  <div className="glass-card rounded-[2rem] p-5">
+    <p className="text-sm text-zinc-500">
+      Kappa Progress
+    </p>
+
+    {(() => {
+      const kappaTasks =
+        tasks.filter(
+          task =>
+            task.kappaRequired
+        );
+
+      const completedKappa =
+        kappaTasks.filter(
+          task =>
+            completedTasks.includes(
+              task.id
+            )
+        );
+
+      const progress =
+        kappaTasks.length > 0
+          ? (completedKappa.length /
+              kappaTasks.length) *
+            100
+          : 0;
+
+      return (
+        <>
+          <div className="mt-4 flex items-center justify-between text-sm">
+            <span className="text-zinc-400">
+              Collector Path
+            </span>
+
+            <span className="font-semibold text-yellow-400">
+              {Math.round(
+                progress
+              )}
+              %
+            </span>
+          </div>
+
+          <div className="mt-3 h-3 overflow-hidden rounded-full bg-white/5">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-yellow-500 to-amber-300"
+              style={{
+                width: `${progress}%`,
+              }}
+            />
+          </div>
+
+          <div className="mt-3 text-xs text-zinc-500">
+            {
+              completedKappa.length
+            }{" "}
+            /{" "}
+            {
+              kappaTasks.length
+            }{" "}
+            Kappa tasks
+            completed
+          </div>
+        </>
+      );
+    })()}
+  </div>
+
+  {/* Active */}
+  <div className="glass-card rounded-[2rem] p-5">
+    <p className="text-sm text-zinc-500">
+      Active Tasks
+    </p>
+
+    <h2 className="mt-3 text-4xl font-black text-blue-400">
+      {
+        progression.active
+          .length
+      }
+    </h2>
+
+    <p className="mt-2 text-sm text-zinc-500">
+      Currently available
+    </p>
+  </div>
+
+  {/* Locked */}
+  <div className="glass-card rounded-[2rem] p-5">
+    <p className="text-sm text-zinc-500">
+      Locked Tasks
+    </p>
+
+    <h2 className="mt-3 text-4xl font-black text-red-400">
+      {
+        progression.locked
+          .length
+      }
+    </h2>
+
+    <p className="mt-2 text-sm text-zinc-500">
+      Awaiting unlocks
+    </p>
+  </div>
+</div>
+
+        {/* ACTIVE TASKS */}
+        <div className="glass-card rounded-[2rem] p-6">
+          <div className="mb-5 flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-indigo-400">
-                Cloud Sync
+              <h2 className="text-2xl font-bold">
+                Current Active
+                Tasks
               </h2>
 
-              <p className="text-sm text-zinc-400">
-                Login with Discord to
-                sync progression across
-                devices
+              <p className="mt-1 text-sm text-zinc-500">
+                Tasks currently
+                available based on
+                your progression.
               </p>
             </div>
 
-            <LoginButton />
-          </div>
-        </div>
-
-        {/* Top Stats */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="rounded-2xl border border-border bg-card p-4">
-            <p className="text-sm text-zinc-500">
-              Tasks Completed
-            </p>
-
-            <h2 className="mt-2 text-2xl font-bold text-green-400">
-              {completedTasks.length}
-            </h2>
+            <Link
+              href="/tasks"
+              className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-black"
+            >
+              Open Tasks
+            </Link>
           </div>
 
-          <div className="rounded-2xl border border-border bg-card p-4">
-            <p className="text-sm text-zinc-500">
-              Kappa Progress
-            </p>
-
-            <h2 className="mt-2 text-2xl font-bold text-yellow-400">
-              {
-                kappaProgress.percentage
-              }
-              %
-            </h2>
-          </div>
-        </div>
-
-        {/* Recommended Tasks */}
-        <div className="rounded-2xl border border-border bg-card p-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">
-              Recommended Next
-              Tasks
-            </h2>
-
-            <span className="text-sm text-zinc-500">
-              Smart Progression
-            </span>
-          </div>
-
-          <div className="mt-4 flex flex-col gap-3">
-            {recommendedTasks.map(
-              (task) => (
-                <Link
-                  key={task.id}
-                  href={`/tasks/${task.id}`}
-                >
-                  <div className="rounded-xl bg-zinc-900/50 p-3 transition hover:bg-zinc-900">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-medium">
-                            {task.name}
-                          </h3>
-
-                          <div className="rounded-full bg-blue-500/15 px-2 py-1 text-[10px] font-bold text-blue-400">
-                            RECOMMENDED
-                          </div>
-                        </div>
-
-                        <p className="text-sm text-zinc-500">
-                          {
-                            task.trader
-                          }
-                        </p>
-                      </div>
-
-                      <div className="flex gap-2">
-                        {task.kappaRequired && (
-                          <div className="rounded-full bg-yellow-500/15 px-3 py-1 text-xs font-medium text-yellow-400">
-                            KAPPA
-                          </div>
-                        )}
-
-                        {task.requiredItems?.some(
-                          (
-                            item
-                          ) =>
-                            item.foundInRaid
-                        ) && (
-                          <div className="rounded-full bg-green-500/15 px-3 py-1 text-xs font-medium text-green-400">
-                            FIR
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {task.levelRequired && (
-                        <div className="rounded-full bg-zinc-800 px-3 py-1 text-xs text-zinc-300">
-                          LV{" "}
-                          {
-                            task.levelRequired
-                          }
-                        </div>
-                      )}
-
-                      {task.xp && (
-                        <div className="rounded-full bg-green-500/15 px-3 py-1 text-xs font-medium text-green-400">
-                          {task.xp.toLocaleString()}{" "}
-                          XP
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </Link>
-              )
-            )}
-          </div>
-        </div>
-
-        {/* Upcoming Needed Items */}
-        <div className="rounded-2xl border border-border bg-card p-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">
-              Needed Soon
-            </h2>
-
-            <span className="text-sm text-zinc-500">
-              Progression Forecast
-            </span>
-          </div>
-
-          <div className="mt-4 flex flex-col gap-3">
-            {upcomingItems.map(
-              (
-                { item, amount },
-                index
-              ) => (
+          <div className="flex flex-col gap-4">
+            {progression.active
+              .slice(0, 5)
+              .map(task => (
                 <div
-                  key={`${item.id}-${amount}-${index}`}
-                  className="flex items-center justify-between rounded-xl bg-zinc-900/50 p-3"
-                >
-                  <div>
-                    <h3 className="font-medium">
-                      {item.name}
-                    </h3>
-
-                    <p className="text-sm text-zinc-500">
-                      Needed for future
-                      quests
-                    </p>
-                  </div>
-
-                  <div className="rounded-full bg-green-500/15 px-3 py-1 text-xs font-medium text-green-400">
-                    x{amount}
-                  </div>
-                </div>
-              )
-            )}
-          </div>
-        </div>
-
-        {/* Remaining Kappa Tasks */}
-        <div className="rounded-2xl border border-border bg-card p-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">
-              Remaining Kappa Tasks
-            </h2>
-
-            <span className="text-sm text-zinc-500">
-              Endgame Progression
-            </span>
-          </div>
-
-          <div className="mt-4 flex flex-col gap-3">
-            {remainingKappaTasks.map(
-              (task) => (
-                <Link
                   key={task.id}
-                  href={`/tasks/${task.id}`}
-                >
-                  <div className="flex items-center justify-between rounded-xl bg-zinc-900/50 p-3 transition hover:bg-zinc-900">
-                    <div>
-                      <h3 className="font-medium">
-                        {task.name}
-                      </h3>
-
-                      <p className="text-sm text-zinc-500">
-                        {task.trader}
-                      </p>
-                    </div>
-
-                    <div className="rounded-full bg-yellow-500/15 px-3 py-1 text-xs font-medium text-yellow-400">
-                      KAPPA
-                    </div>
-                  </div>
-                </Link>
-              )
-            )}
-          </div>
-        </div>
-
-        {/* Trader Progress */}
-        <div className="rounded-2xl border border-border bg-card p-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">
-              Trader Progress
-            </h2>
-
-            <span className="text-sm text-zinc-500">
-              Progression Breakdown
-            </span>
-          </div>
-
-          <div className="mt-4 flex flex-col gap-3">
-            {traderProgress.map(
-              (trader) => (
-                <div
-                  key={trader.trader}
-                  className="rounded-xl bg-zinc-900/50 p-3"
+                  className="rounded-2xl border border-white/5 bg-white/[0.03] p-4"
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="font-medium">
+                      <h3 className="font-semibold">
                         {
-                          trader.trader
+                          task.name
                         }
                       </h3>
 
-                      <p className="text-sm text-zinc-500">
+                      <p className="mt-1 text-sm text-zinc-500">
                         {
-                          trader.completed
-                        }{" "}
-                        /{" "}
-                        {trader.total}{" "}
-                        Tasks
+                          task.trader
+                        }
                       </p>
                     </div>
 
-                    <div className="rounded-full bg-blue-500/15 px-3 py-1 text-xs font-medium text-blue-400">
-                      {
-                        trader.percentage
-                      }
-                      %
+                    <div className="rounded-full bg-blue-500/15 px-3 py-1 text-xs font-semibold text-blue-400">
+                      ACTIVE
                     </div>
                   </div>
-
-                  <div className="mt-3 h-2 overflow-hidden rounded-full bg-zinc-800">
-                    <div
-                      className="h-full rounded-full bg-blue-400 transition-all"
-                      style={{
-                        width: `${trader.percentage}%`,
-                      }}
-                    />
-                  </div>
                 </div>
-              )
-            )}
+              ))}
           </div>
         </div>
       </div>

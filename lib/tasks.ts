@@ -1,34 +1,13 @@
-import { allTasks } from "@/data/tasks";
+import { getTasks } from "@/lib/task-provider";
 
-export function getTaskById(
+export async function getTaskById(
   id: string
 ) {
-  return allTasks.find(
-    (task) => task.id === id
-  );
-}
+  const tasks =
+    await getTasks();
 
-export function getTasksByTrader(
-  trader: string
-) {
-  return allTasks.filter(
+  return tasks.find(
     (task) =>
-      task.trader === trader
-  );
-}
-
-export function getKappaTasks() {
-  return allTasks.filter(
-    (task) => task.kappaRequired
-  );
-}
-
-export function getTasksByLevel(
-  level: number
-) {
-  return allTasks.filter(
-    (task) =>
-      (task.levelRequired || 1) <=
-      level
+      task.id === id
   );
 }

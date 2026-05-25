@@ -2,8 +2,8 @@ import Link from "next/link";
 
 import {
   getItemBySlug,
-  getTasksByItem,
   getItemPriority,
+  getModulesByItem,
 } from "@/lib/item-intelligence";
 
 interface ItemPageProps {
@@ -30,11 +30,21 @@ export default async function ItemPage({
     );
   }
 
-  const relatedTasks =
-    getTasksByItem(item.id);
+  /*
+    LIVE INTELLIGENCE
+  */
 
   const priority =
     getItemPriority(item.id);
+
+  /*
+    HIDEOUT USAGE
+  */
+
+  const relatedModules =
+    getModulesByItem(
+      item.id
+    );
 
   return (
     <div className="min-h-screen bg-background p-4 pb-28 text-white">
@@ -77,7 +87,8 @@ export default async function ItemPage({
               </h2>
 
               <p className="text-sm text-zinc-400">
-                Progression Analysis
+                Live progression
+                analysis
               </p>
             </div>
 
@@ -89,11 +100,13 @@ export default async function ItemPage({
           <div className="mt-4 grid grid-cols-2 gap-3">
             <div className="rounded-xl bg-black/20 p-3">
               <p className="text-xs text-zinc-500">
-                Related Tasks
+                Hideout Usage
               </p>
 
               <h3 className="mt-1 text-xl font-bold">
-                {relatedTasks.length}
+                {
+                  relatedModules.length
+                }
               </h3>
             </div>
 
@@ -110,54 +123,53 @@ export default async function ItemPage({
           </div>
         </div>
 
-        {/* Related Tasks */}
+        {/* Hideout Usage */}
         <div className="rounded-2xl border border-border bg-card p-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">
-              Required For
+              Hideout Usage
             </h2>
 
             <span className="text-sm text-zinc-500">
-              Future Tasks
+              Module Requirements
             </span>
           </div>
 
           <div className="mt-4 flex flex-col gap-3">
-            {relatedTasks.length >
+            {relatedModules.length >
             0 ? (
-              relatedTasks.map(
-                (task) => (
-                  <Link
-                    href={`/tasks/${task.id}`}
-                    key={task.id}
+              relatedModules.map(
+                (module) => (
+                  <div
+                    key={
+                      module.id
+                    }
+                    className="rounded-xl bg-zinc-900/50 p-3"
                   >
-                    <div className="rounded-xl bg-zinc-900/50 p-3 transition hover:bg-zinc-900">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="font-medium">
-                            {task.name}
-                          </h3>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="font-medium">
+                          {
+                            module.name
+                          }
+                        </h3>
 
-                          <p className="text-sm text-zinc-500">
-                            {
-                              task.trader
-                            }
-                          </p>
-                        </div>
+                        <p className="text-sm text-zinc-500">
+                          Hideout Module
+                        </p>
+                      </div>
 
-                        {task.kappaRequired && (
-                          <div className="rounded-full bg-yellow-500/15 px-3 py-1 text-xs font-medium text-yellow-400">
-                            KAPPA
-                          </div>
-                        )}
+                      <div className="rounded-full bg-blue-500/15 px-3 py-1 text-xs font-medium text-blue-400">
+                        HIDEOUT
                       </div>
                     </div>
-                  </Link>
+                  </div>
                 )
               )
             ) : (
               <div className="rounded-xl bg-zinc-900/50 p-4 text-sm text-zinc-500">
-                No tasks currently use
+                No hideout modules
+                currently require
                 this item.
               </div>
             )}
@@ -172,15 +184,8 @@ export default async function ItemPage({
 
           <div className="mt-4 flex flex-col gap-2 text-sm text-zinc-400">
             <p>
-              • Flea market tracking
-            </p>
-
-            <p>
-              • Average value trends
-            </p>
-
-            <p>
-              • Hideout requirements
+              • Live Tarkov.dev item
+              relationships
             </p>
 
             <p>
@@ -190,8 +195,25 @@ export default async function ItemPage({
             <p>
               • Crafting recipes
             </p>
+
+            <p>
+              • Flea market trends
+            </p>
+
+            <p>
+              • Progression demand
+              forecasting
+            </p>
           </div>
         </div>
+
+        {/* Back */}
+        <Link
+          href="/items"
+          className="text-sm text-zinc-500 transition hover:text-white"
+        >
+          ← Back to Items
+        </Link>
       </div>
     </div>
   );

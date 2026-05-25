@@ -1,31 +1,56 @@
-import { ItemReference } from "./item";
+export interface TarkovObjective {
+  id?: string;
+
+  description?: string;
+}
 
 export interface TarkovTask {
   id: string;
 
-  trader: string;
-
   name: string;
 
-  kappaRequired: boolean;
+  trader?: string | null;
 
-  objectives: string[];
-
-  rewards?: string[];
-
-  requiredItems?: ItemReference[];
-
-  prerequisites?: string[];
-
-  unlocks?: string[];
+  map?: string;
 
   maps?: string[];
 
+  wikiLink?: string;
+
+  experience?: number;
+
   xp?: number;
 
-  reputation?: number;
+  /*
+    LIVE OBJECTIVES
+    FROM TARKOV.DEV
+  */
+  objectives?: TarkovObjective[];
+
+  /*
+    PROGRESSION
+  */
+  prerequisites?: string[];
+
+  missingRequirements?: string[];
+
+  /*
+    TASK META
+  */
+  factionName?: string;
+
+  kappaRequired?: boolean;
 
   levelRequired?: number;
 
-  completed?: boolean;
+  minPlayerLevel?: number;
+
+  /*
+    SPECIAL TASK TYPES
+  */
+  isEvent?: boolean;
+
+  isLightkeeper?: boolean;
+
+  isAvailableFromStart?: boolean;
 }

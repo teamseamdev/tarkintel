@@ -1,193 +1,348 @@
+"use client";
+
 import Link from "next/link";
 
 import {
-  getTaskById,
-  getItemById,
-} from "@/lib/item-intelligence";
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
-interface TaskPageProps {
-  params: Promise<{
-    id: string;
-  }>;
-}
+import { useParams } from "next/navigation";
 
-export default async function TaskPage({
-  params,
-}: TaskPageProps) {
-  const { id } = await params;
+import { useTaskProgress } from "@/hooks/use-task-progress";
 
-  const task = getTaskById(id);
+import { buildProgressionState } from "@/lib/build-progression-state";
 
-  if (!task) {
+import { TarkovTask } from "@/types/task";
+
+export default function TaskPage() {
+  const params = useParams();
+
+  const taskId =
+    params.id as string;
+
+  const {
+    completedTasks,
+    toggleTask,
+    isTaskCompleted,
+    loaded,
+  } = useTaskProgress();
+
+  const [tasks, setTasks] =
+    useState<TarkovTask[]>(
+      []
+    );
+
+  const [loading, setLoading] =
+    useState(true);
+
+  /*
+    LOAD TASKS
+  */
+
+  useEffect(() => {
+    async function loadTasks() {
+      try {
+        const response =
+          await fetch(
+            "/api/tasks"
+          );
+
+        const data =
+          await response.json();
+
+        setTasks(data);
+      } catch (error) {
+        console.error(
+          "FAILED TO LOAD TASKS:",
+          error
+        );
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadTasks();
+  }, []);
+
+  /*
+    PROGRESSION ENGINE
+  */
+
+  const progression =
+    useMemo(() => {
+      return buildProgressionState(
+        tasks,
+        completedTasks
+      );
+    }, [
+      tasks,
+      completedTasks,
+    ]);
+
+  /*
+    FIND TASK
+  */
+
+  const allTasks = [
+    ...progression.active,
+    ...progression.locked,
+    ...progression.completed,
+  ];
+
+  const task =
+    allTasks.find(
+      (task) =>
+        task.id === taskId
+    );
+
+  const completed =
+    task
+      ? isTaskCompleted(
+          task.id
+        )
+      : false;
+
+  /*
+    LOADING
+  */
+
+  if (!loaded || loading) {
     return (
-      <div className="min-h-screen bg-background p-4 text-white">
-        <h1 className="text-2xl font-bold">
-          Task not found
-        </h1>
+      <div className="min-h-screen p-6 text-white">
+        <div className="glass-card rounded-3xl p-6">
+          Loading task...
+        </div>
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-background p-4 pb-28 text-white">
-      <div className="flex flex-col gap-6">
-        {/* Header */}
-        <div>
-          <p className="text-sm text-zinc-500">
-            {task.trader}
+  /*
+    NOT FOUND
+  */
+
+  if (!task) {
+    return (
+      <div className="min-h-screen p-6 text-white">
+        <div className="glass-card rounded-[2rem] p-8">
+          <h1 className="text-3xl font-black">
+            Task Not Found
+          </h1>
+
+          <p className="mt-3 text-zinc-400">
+            This task could
+            not be found in
+            the live Tarkov
+            dataset.
           </p>
 
-          <div className="mt-1 flex items-center gap-3">
-            <h1 className="text-3xl font-bold tracking-tight">
+          <Link
+            href="/tasks"
+            className="mt-6 inline-flex rounded-full bg-primary px-5 py-3 font-semibold text-black"
+          >
+            Return to Tasks
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  /*
+    LOCK STATE
+  */
+
+  const locked =
+    !!task
+      .missingRequirements
+      ?.length;
+
+  return (
+    <div className="min-h-screen p-4 pb-28 text-white">
+      <div className="mx-auto flex max-w-5xl flex-col gap-6">
+        {/* HERO */}
+        <div className="glass-card relative overflow-hidden rounded-[2rem] p-8">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#B8895A]/10 to-transparent" />
+
+          <div className="relative z-10">
+            <div className="flex flex-wrap items-center gap-3">
+              {task.kappaRequired && (
+                <div className="rounded-full bg-yellow-500/15 px-3 py-1 text-xs font-semibold text-yellow-400">
+                  KAPPA
+                </div>
+              )}
+
+              <div
+                className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                  completed
+                    ? "bg-primary/15 text-primary"
+                    : locked
+                    ? "bg-red-500/15 text-red-400"
+                    : "bg-blue-500/15 text-blue-400"
+                }`}
+              >
+                {completed
+                  ? "COMPLETED"
+                  : locked
+                  ? "LOCKED"
+                  : "ACTIVE"}
+              </div>
+            </div>
+
+            <h1 className="mt-5 text-5xl font-black tracking-tight">
               {task.name}
             </h1>
 
-            {task.kappaRequired && (
-              <div className="rounded-full bg-yellow-500/15 px-3 py-1 text-xs font-medium text-yellow-400">
-                KAPPA
+            <p className="mt-3 text-zinc-400">
+              {
+                task.trader
+              }
+            </p>
+
+            <div className="mt-6 flex flex-wrap gap-2">
+              {task.levelRequired && (
+                <div className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-zinc-300">
+                  Level{" "}
+                  {
+                    task.levelRequired
+                  }
+                </div>
+              )}
+
+              {task.maps?.map(
+                (
+                  map: string
+                ) => (
+                  <div
+                    key={map}
+                    className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-zinc-300"
+                  >
+                    {map}
+                  </div>
+                )
+              )}
+
+              <div className="rounded-full bg-primary/15 px-3 py-2 text-sm font-semibold text-primary">
+                {task.xp?.toLocaleString()}{" "}
+                XP
               </div>
-            )}
+            </div>
           </div>
         </div>
 
-        {/* Objectives */}
-        <div className="rounded-2xl border border-border bg-card p-4">
-          <h2 className="text-lg font-semibold">
+        {/* LOCKED STATE */}
+        {locked && (
+          <div className="rounded-[2rem] border border-red-500/20 bg-red-500/5 p-6">
+            <h2 className="text-xl font-bold text-red-400">
+              Locked Task
+            </h2>
+
+            <p className="mt-2 text-sm text-red-200">
+              This task is
+              currently locked
+              by unfinished
+              prerequisite
+              tasks.
+            </p>
+
+            <div className="mt-5 flex flex-col gap-3">
+              {task.missingRequirements?.map(
+                (
+                  requirement: string
+                ) => (
+                  <div
+                    key={
+                      requirement
+                    }
+                    className="rounded-2xl border border-red-500/10 bg-black/20 px-4 py-3 text-sm text-red-200"
+                  >
+                    Missing
+                    prerequisite:{" "}
+                    {
+                      requirement
+                    }
+                  </div>
+                )
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* OBJECTIVES */}
+        <div className="glass-card rounded-[2rem] p-6">
+          <h2 className="text-2xl font-bold">
             Objectives
           </h2>
 
-          <div className="mt-4 flex flex-col gap-3">
-            {task.objectives.map(
-              (objective) => (
-                <div
-                  key={objective}
-                  className="rounded-xl bg-zinc-900/50 p-3 text-sm text-zinc-300"
-                >
-                  {objective}
-                </div>
+          <div className="mt-5 flex flex-col gap-3">
+            {task.objectives
+              ?.length ? (
+              task.objectives.map(
+                (
+                  objective: any,
+                  index: number
+                ) => (
+                  <div
+                    key={`${task.id}-objective-${index}`}
+                    className="rounded-2xl border border-white/5 bg-white/[0.03] px-4 py-3 text-sm text-zinc-300"
+                  >
+                    •{" "}
+                    {objective.description ||
+                      "Objective"}
+                  </div>
+                )
               )
+            ) : (
+              <div className="rounded-2xl border border-white/5 bg-white/[0.03] px-4 py-3 text-sm text-zinc-500">
+                No objectives
+                available
+              </div>
             )}
           </div>
         </div>
 
-        {/* Required Items */}
-        {task.requiredItems &&
-          task.requiredItems.length >
-            0 && (
-            <div className="rounded-2xl border border-border bg-card p-4">
-              <h2 className="text-lg font-semibold">
-                Required Items
-              </h2>
-
-              <div className="mt-4 flex flex-col gap-3">
-                {task.requiredItems.map(
-                  (item) => {
-                    const itemData =
-                      getItemById(
-                        item.itemId
-                      );
-
-                    return (
-                      <Link
-                        href={`/items/${item.itemId}`}
-                        key={
-                          item.itemId
-                        }
-                      >
-                        <div className="flex items-center justify-between rounded-xl bg-zinc-900/50 p-3 transition hover:bg-zinc-900">
-                          <div>
-                            <h3 className="font-medium">
-                              {itemData?.name ||
-                                item.itemId}
-                            </h3>
-
-                            <p className="text-sm text-zinc-500">
-                              Quest Requirement
-                            </p>
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                            {item.foundInRaid && (
-                              <div className="rounded-full bg-green-500/15 px-3 py-1 text-xs font-medium text-green-400">
-                                FIR
-                              </div>
-                            )}
-
-                            <div className="rounded-full bg-blue-500/15 px-3 py-1 text-xs font-medium text-blue-400">
-                              x
-                              {
-                                item.amount
-                              }
-                            </div>
-                          </div>
-                        </div>
-                      </Link>
-                    );
-                  }
-                )}
-              </div>
-            </div>
-          )}
-
-        {/* Rewards */}
-        {task.rewards &&
-          task.rewards.length >
-            0 && (
-            <div className="rounded-2xl border border-border bg-card p-4">
-              <h2 className="text-lg font-semibold">
-                Rewards
-              </h2>
-
-              <div className="mt-4 flex flex-col gap-3">
-                {task.rewards.map(
-                  (reward) => (
-                    <div
-                      key={reward}
-                      className="rounded-xl bg-zinc-900/50 p-3 text-sm text-zinc-300"
-                    >
-                      {reward}
-                    </div>
-                  )
-                )}
-              </div>
-            </div>
-          )}
-
-        {/* Task Info */}
-        <div className="grid grid-cols-3 gap-3">
-          <div className="rounded-2xl border border-border bg-card p-4">
-            <p className="text-xs text-zinc-500">
-              XP
-            </p>
-
-            <h2 className="mt-1 text-xl font-bold text-green-400">
-              {task.xp?.toLocaleString()}
-            </h2>
-          </div>
-
-          <div className="rounded-2xl border border-border bg-card p-4">
-            <p className="text-xs text-zinc-500">
-              Rep
-            </p>
-
-            <h2 className="mt-1 text-xl font-bold text-blue-400">
-              +
-              {task.reputation}
-            </h2>
-          </div>
-
-          <div className="rounded-2xl border border-border bg-card p-4">
-            <p className="text-xs text-zinc-500">
-              Level
-            </p>
-
-            <h2 className="mt-1 text-xl font-bold text-yellow-400">
-              {
-                task.levelRequired
+        {/* ACTIONS */}
+        <div className="glass-card rounded-[2rem] p-6">
+          <div className="flex flex-col gap-4 md:flex-row">
+            <button
+              onClick={() =>
+                toggleTask(
+                  task.id
+                )
               }
-            </h2>
+              className={`flex-1 rounded-2xl py-4 font-semibold transition-all duration-300 ${
+                completed
+                  ? "border border-white/10 bg-white/[0.03] text-zinc-300 hover:bg-white/[0.06]"
+                  : "bg-gradient-to-r from-[#B8895A] to-[#D4A574] text-black hover:scale-[1.01]"
+              }`}
+            >
+              {completed
+                ? "Mark Incomplete"
+                : "Mark Complete"}
+            </button>
+
+            {task.wikiLink && (
+              <a
+                href={
+                  task.wikiLink
+                }
+                target="_blank"
+                rel="noreferrer"
+                className="flex-1 rounded-2xl border border-white/10 bg-white/[0.03] py-4 text-center font-semibold text-white transition-all duration-300 hover:bg-white/[0.06]"
+              >
+                Open Wiki
+              </a>
+            )}
           </div>
         </div>
+
+        {/* BACK */}
+        <Link
+          href="/tasks"
+          className="text-center text-sm text-zinc-500 hover:text-white"
+        >
+          ← Back to Tasks
+        </Link>
       </div>
     </div>
   );

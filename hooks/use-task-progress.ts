@@ -15,19 +15,51 @@ import {
 const STORAGE_KEY =
   "tarkintel-completed-tasks";
 
+const LEVEL_OVERRIDE_KEY =
+  "tarkintel-level-override";
+
 export function useTaskProgress() {
   const { profile } = useAuth();
 
-  const [completedTasks, setCompletedTasks] =
-    useState<string[]>([]);
+  /*
+    PLAYER LEVEL OVERRIDE
+  */
+
+  const [
+    playerLevelOverride,
+    setPlayerLevelOverride,
+  ] = useState<number | null>(
+    null
+  );
+
+  /*
+    COMPLETED TASKS
+  */
+
+  const [
+    completedTasks,
+    setCompletedTasks,
+  ] = useState<string[]>(
+    []
+  );
+
+  /*
+    LOAD STATE
+  */
 
   const [loaded, setLoaded] =
     useState(false);
 
-  // Initial Load
+  /*
+    INITIAL LOAD
+  */
+
   useEffect(() => {
     async function loadProgress() {
-      // CLOUD LOAD
+      /*
+        CLOUD LOAD
+      */
+
       if (profile?.id) {
         const cloudProgress =
           await loadTaskProgress(
@@ -50,21 +82,39 @@ export function useTaskProgress() {
         setCompletedTasks(
           completed
         );
-
-        setLoaded(true);
-
-        return;
       }
 
-      // LOCAL FALLBACK
+      /*
+        LOCAL TASK FALLBACK
+      */
+
       const saved =
         localStorage.getItem(
           STORAGE_KEY
         );
 
-      if (saved) {
+      if (
+        saved &&
+        completedTasks.length ===
+          0
+      ) {
         setCompletedTasks(
           JSON.parse(saved)
+        );
+      }
+
+      /*
+        LEVEL OVERRIDE
+      */
+
+      const savedLevel =
+        localStorage.getItem(
+          LEVEL_OVERRIDE_KEY
+        );
+
+      if (savedLevel) {
+        setPlayerLevelOverride(
+          JSON.parse(savedLevel)
         );
       }
 
@@ -74,7 +124,10 @@ export function useTaskProgress() {
     loadProgress();
   }, [profile]);
 
-  // Local Backup Save
+  /*
+    LOCAL TASK SAVE
+  */
+
   useEffect(() => {
     if (!loaded) return;
 
@@ -87,9 +140,31 @@ export function useTaskProgress() {
     );
   }, [
     completedTasks,
-
     loaded,
   ]);
+
+  /*
+    LEVEL OVERRIDE SAVE
+  */
+
+  useEffect(() => {
+    if (!loaded) return;
+
+    localStorage.setItem(
+      LEVEL_OVERRIDE_KEY,
+
+      JSON.stringify(
+        playerLevelOverride
+      )
+    );
+  }, [
+    playerLevelOverride,
+    loaded,
+  ]);
+
+  /*
+    TOGGLE TASK
+  */
 
   async function toggleTask(
     taskId: string
@@ -99,34 +174,38 @@ export function useTaskProgress() {
         taskId
       );
 
-    setCompletedTasks((prev) => {
+    setCompletedTasks(prev => {
       if (
         prev.includes(taskId)
       ) {
         return prev.filter(
-          (id) =>
+          id =>
             id !== taskId
         );
       }
 
       return [
         ...prev,
-
         taskId,
       ];
     });
 
-    // CLOUD SAVE
+    /*
+      CLOUD SAVE
+    */
+
     if (profile?.id) {
       await saveTaskProgress(
         profile.id,
-
         taskId,
-
         completed
       );
     }
   }
+
+  /*
+    TASK CHECK
+  */
 
   function isTaskCompleted(
     taskId: string
@@ -137,12 +216,20 @@ export function useTaskProgress() {
   }
 
   return {
-  completedTasks,
+    completedTasks,
 
-  toggleTask,
+    toggleTask,
 
-  isTaskCompleted,
+    isTaskCompleted,
 
-  loaded,
-};
+    loaded,
+
+    /*
+      PLAYER STATE
+    */
+
+    playerLevelOverride,
+
+    setPlayerLevelOverride,
+  };
 }
