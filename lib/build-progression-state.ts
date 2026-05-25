@@ -140,14 +140,28 @@ export function buildProgressionState(
       LEVEL GATING
     */
 
-    const minimumLevel =
-      task.minPlayerLevel ||
-      1;
+   const minimumLevel =
+  task.minPlayerLevel ||
+  task.levelRequired ||
+  1;
 
     const levelEligible =
       minimumLevel <=
       playerLevel;
 
+
+        if (
+  task.name ===
+  "First in Line"
+) {
+  console.log({
+    playerLevel,
+    minimumLevel,
+    levelEligible,
+    prerequisites,
+    missingRequirements,
+  });
+}
     /*
       ENRICHED TASK
     */
@@ -192,17 +206,7 @@ export function buildProgressionState(
     /*
       LOCKED
     */
-console.log(
-  "LOCKED TASK:",
-  {
-    name: task.name,
-    trader: task.trader,
-    prerequisites,
-    missingRequirements,
-    playerLevel,
-    minimumLevel,
-  }
-);
+
 
 
     locked.push(

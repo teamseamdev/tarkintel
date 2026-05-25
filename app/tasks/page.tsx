@@ -23,6 +23,8 @@ import { TaskFilter } from "@/types/task-filter";
 import { TarkovTask } from "@/types/task";
 
 import { TaskOverview } from "@/components/tasks/TaskOverview";
+import { TaskCard } from "@/components/tasks/TaskCard";
+
 
 export default function TasksPage() {
   const {
@@ -85,6 +87,7 @@ export default function TasksPage() {
 
   const [searchQuery, setSearchQuery] =
     useState("");
+
 
   /*
     LOAD LIVE TASKS
@@ -452,283 +455,130 @@ export default function TasksPage() {
         </div>
 
         {/* Filters */}
-        <div className="glass-card rounded-[2rem] p-4">
-          <div className="flex gap-3 overflow-x-auto pb-1">
-            {[
-              {
-                label: "Active",
-                value: "active",
-              },
-              {
-                label: "Locked",
-                value: "locked",
-              },
-              {
-                label: "Completed",
-                value: "completed",
-              },
-              {
-                label: "Kappa",
-                value: "kappa",
-              },
-              {
-                label: "FIR",
-                value: "fir",
-              },
-              {
-                label: "Prapor",
-                value: "prapor",
-              },
-              {
-                label: "Therapist",
-                value: "therapist",
-              },
-              {
-                label: "Skier",
-                value: "skier",
-              },
-              {
-                label: "Peacekeeper",
-                value: "peacekeeper",
-              },
-              {
-                label: "Mechanic",
-                value: "mechanic",
-              },
-              {
-                label: "Ragman",
-                value: "ragman",
-              },
-              {
-                label: "Jaeger",
-                value: "jaeger",
-              },
-            ].map((filter) => {
-              const active =
-                activeFilter ===
-                filter.value;
+<div className="glass-card rounded-[2rem] p-4">
+  <div className="flex gap-3 overflow-x-auto pb-1">
+    {[
+      {
+        label: "Active",
+        value: "active",
+      },
+      {
+        label: "Locked",
+        value: "locked",
+      },
+      {
+        label: "Completed",
+        value: "completed",
+      },
+      {
+        label: "Kappa",
+        value: "kappa",
+      },
+      {
+        label: "FIR",
+        value: "fir",
+      },
+      {
+        label: "Prapor",
+        value: "prapor",
+      },
+      {
+        label: "Therapist",
+        value: "therapist",
+      },
+      {
+        label: "Skier",
+        value: "skier",
+      },
+      {
+        label: "Peacekeeper",
+        value: "peacekeeper",
+      },
+      {
+        label: "Mechanic",
+        value: "mechanic",
+      },
+      {
+        label: "Ragman",
+        value: "ragman",
+      },
+      {
+        label: "Jaeger",
+        value: "jaeger",
+      },
+    ].map((filter) => {
+      const active =
+        activeFilter ===
+        filter.value;
 
-              return (
-                <button
-                  key={
-                    filter.value
-                  }
-                  onClick={() =>
-                    setActiveFilter(
-                      filter.value as TaskFilter
-                    )
-                  }
-                  className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 ${
-                    active
-                      ? "bg-gradient-to-r from-[#B8895A] to-[#D4A574] text-black shadow-lg"
-                      : "border border-white/10 bg-white/[0.03] text-zinc-400 hover:bg-white/[0.06] hover:text-white"
-                  }`}
-                >
-                  {filter.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+      return (
+        <button
+          key={filter.value}
+          onClick={() =>
+            setActiveFilter(
+              filter.value as TaskFilter
+            )
+          }
+          className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 ${
+            active
+              ? "bg-gradient-to-r from-[#B8895A] to-[#D4A574] text-black shadow-lg"
+              : "border border-white/10 bg-white/[0.03] text-zinc-400 hover:bg-white/[0.06] hover:text-white"
+          }`}
+        >
+          {filter.label}
+        </button>
+      );
+    })}
+  </div>
+</div>
 
-        {/* Task Cards */}
-        <div className="flex flex-col gap-5">
-          {sortedTasks.map(
-            (task: any) => {
-              const completed =
-                isTaskCompleted(
-                  task.id
-                );
+{/* Scrollable Task Feed */}
+<div className="glass-card rounded-[2rem] p-4">
+  <div className="mb-4 flex items-center justify-between">
+    <div>
+      <h2 className="text-2xl font-black text-white">
+        Tasks
+      </h2>
 
-              const locked =
-                task
-                  .missingRequirements
-                  ?.length > 0;
+      <p className="text-sm text-zinc-500">
+        {sortedTasks.length} visible
+      </p>
+    </div>
+  </div>
 
-              return (
-                <Link
-                  href={`/tasks/${task.id}`}
-                  key={task.id}
-                >
-                  <div
-                    className={`glass-hover relative overflow-hidden rounded-[2rem] border p-5 transition-all duration-300 ${
-                      completed
-                        ? "border-primary/20 bg-primary/5 opacity-70"
-                        : locked
-                        ? "border-red-500/20 bg-red-500/5"
-                        : "glass-card"
-                    }`}
-                  >
-                    {!completed && (
-                      <div className="absolute inset-0 bg-gradient-to-br from-[#B8895A]/5 to-transparent" />
-                    )}
+  <div className="flex max-h-[70vh] flex-col gap-5 overflow-y-auto pr-2">
+    {sortedTasks.map(
+      (task: any) => {
+        const completed =
+          isTaskCompleted(
+            task.id
+          );
 
-                    <div className="relative z-10">
-                      {/* Top */}
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <div className="flex flex-wrap items-center gap-2">
-                            <h2
-                              className={`text-xl font-bold ${
-                                completed
-                                  ? "text-primary line-through"
-                                  : ""
-                              }`}
-                            >
-                              {task.name}
-                            </h2>
+        const locked =
+          !!task
+            .missingRequirements
+            ?.length;
 
-                            {!completed &&
-                              !locked && (
-                                <div className="rounded-full bg-primary/15 px-2 py-1 text-[10px] font-bold text-primary">
-                                  ACTIVE
-                                </div>
-                              )}
-
-                            {locked && (
-                              <div className="rounded-full bg-red-500/15 px-2 py-1 text-[10px] font-bold text-red-400">
-                                LOCKED
-                              </div>
-                            )}
-                          </div>
-
-                          <p className="mt-2 text-sm text-zinc-500">
-                            {task.trader}
-                          </p>
-                        </div>
-
-                        <div className="flex flex-wrap items-center justify-end gap-2">
-                          {task.kappaRequired && (
-                            <div className="rounded-full bg-yellow-500/15 px-3 py-1 text-xs font-semibold text-yellow-400">
-                              KAPPA
-                            </div>
-                          )}
-
-                          <div
-                            className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                              completed
-                                ? "bg-primary/15 text-primary"
-                                : locked
-                                ? "bg-red-500/15 text-red-400"
-                                : "bg-blue-500/15 text-blue-400"
-                            }`}
-                          >
-                            {completed
-                              ? "COMPLETED"
-                              : locked
-                              ? "LOCKED"
-                              : "ACTIVE"}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Lock Reason */}
-                      {locked && (
-                        <div className="mt-4 rounded-2xl border border-red-500/10 bg-red-500/5 px-4 py-3 text-sm text-red-300">
-                          Locked by{" "}
-                          {
-                            task
-                              .missingRequirements
-                              ?.length
-                          }{" "}
-                          prerequisite
-                          task(s)
-                        </div>
-                      )}
-
-                      {/* Objectives */}
-                      <div className="mt-5">
-                        <p className="mb-3 text-sm font-medium text-zinc-400">
-                          Objectives
-                        </p>
-
-                        <div className="flex flex-col gap-2">
-                          {task.objectives
-                            ?.length ? (
-                            task.objectives
-                              .slice(0, 3)
-                              .map(
-                                (
-                                  objective: any,
-                                  index: number
-                                ) => (
-                                  <div
-                                    key={`${task.id}-objective-${index}`}
-                                    className="rounded-2xl border border-white/5 bg-white/[0.03] px-4 py-3 text-sm text-zinc-300"
-                                  >
-                                    •{" "}
-                                    {objective.description ||
-                                      "Objective"}
-                                  </div>
-                                )
-                              )
-                          ) : (
-                            <div className="rounded-2xl border border-white/5 bg-white/[0.03] px-4 py-3 text-sm text-zinc-500">
-                              No objectives
-                              available
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Metadata */}
-                      <div className="mt-5 flex flex-wrap gap-2">
-                        {task.levelRequired && (
-                          <div className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs text-zinc-300">
-                            LV{" "}
-                            {
-                              task.levelRequired
-                            }
-                          </div>
-                        )}
-
-                        {task.maps?.map(
-                          (
-                            map: string
-                          ) => (
-                            <div
-                              key={map}
-                              className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs text-zinc-300"
-                            >
-                              {map}
-                            </div>
-                          )
-                        )}
-
-                        <div className="rounded-full bg-primary/15 px-3 py-1 text-xs font-semibold text-primary">
-                          {task.xp?.toLocaleString()}{" "}
-                          XP
-                        </div>
-                      </div>
-
-                      {/* Footer */}
-                      <button
-                        onClick={(
-                          e
-                        ) => {
-                          e.preventDefault();
-
-                          toggleTask(
-                            task.id
-                          );
-                        }}
-                        className={`mt-6 w-full rounded-2xl py-4 font-semibold transition-all duration-300 ${
-                          completed
-                            ? "border border-white/10 bg-white/[0.03] text-zinc-300 hover:bg-white/[0.06]"
-                            : "bg-gradient-to-r from-[#B8895A] to-[#D4A574] text-black hover:scale-[1.01]"
-                        }`}
-                      >
-                        {completed
-                          ? "Mark Incomplete"
-                          : "Mark Complete"}
-                      </button>
-                    </div>
-                  </div>
-                </Link>
-              );
+        return (
+          <TaskCard
+            key={task.id}
+            task={task}
+            completed={
+              completed
             }
-          )}
-        </div>
+            locked={locked}
+            onToggleComplete={() =>
+              toggleTask(
+                task.id
+              )
+            }
+          />
+        );
+      }
+    )}
+  </div>
+</div>
+    
       </div>
     </div>
   );

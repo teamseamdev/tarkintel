@@ -6,6 +6,7 @@ import {
 } from "react";
 
 import { useAuth } from "@/components/auth-provider";
+import LoginButton from "@/components/login-button";
 
 import { useTaskProgress } from "@/hooks/use-task-progress";
 
@@ -179,6 +180,10 @@ export default function ProfilePage() {
                 </p>
               </div>
             </div>
+
+            <div className="flex justify-end">
+  <LoginButton />
+</div>
 
             {/* Profile Stats */}
             <div className="grid grid-cols-3 gap-3">

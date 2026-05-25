@@ -12,6 +12,10 @@ export default function LoginButton() {
   const [showConfirm, setShowConfirm] =
     useState(false);
 
+  /*
+    LOGIN
+  */
+
   async function login() {
     await supabase.auth.signInWithOAuth(
       {
@@ -19,6 +23,10 @@ export default function LoginButton() {
       }
     );
   }
+
+  /*
+    LOGOUT
+  */
 
   async function logout() {
     try {
@@ -41,51 +49,54 @@ export default function LoginButton() {
     }
   }
 
+  /*
+    AUTHENTICATED
+  */
+
   if (user) {
     return (
       <>
-        <div className="flex items-center gap-3">
+        <button
+          onClick={() =>
+            setShowConfirm(true)
+          }
+          className="glass-hover flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 transition-all duration-300 hover:bg-white/[0.06]"
+        >
           <img
             src={
               user.user_metadata
                 ?.avatar_url
             }
             alt="Avatar"
-            className="h-10 w-10 rounded-full border border-zinc-700"
+            className="h-11 w-11 rounded-full border border-white/10 object-cover"
           />
 
-          <div className="flex flex-col">
-            <span className="text-sm font-medium text-white">
+          <div className="flex flex-col items-start">
+            <span className="text-sm font-semibold text-white">
               {
                 user.user_metadata
                   ?.full_name
               }
             </span>
 
-            <button
-              onClick={() =>
-                setShowConfirm(
-                  true
-                )
-              }
-              className="text-left text-xs text-red-400 transition hover:text-red-300"
-            >
-              Logout
-            </button>
+            <span className="text-xs text-zinc-500">
+              Connected
+            </span>
           </div>
-        </div>
+        </button>
 
-        {/* Logout Modal */}
+        {/* LOGOUT MODAL */}
         {showConfirm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-            <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-6">
-              <h2 className="text-lg font-semibold text-white">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+            <div className="glass-card w-full max-w-sm rounded-[2rem] p-6">
+              <h2 className="text-2xl font-black text-white">
                 Logout?
               </h2>
 
-              <p className="mt-2 text-sm text-zinc-400">
+              <p className="mt-3 text-sm text-zinc-400">
                 Are you sure you want
-                to logout of TarkIntel?
+                to disconnect your
+                TarkIntel profile?
               </p>
 
               <div className="mt-6 flex gap-3">
@@ -95,14 +106,14 @@ export default function LoginButton() {
                       false
                     )
                   }
-                  className="flex-1 rounded-xl bg-zinc-800 px-4 py-3 text-sm font-medium text-white transition hover:bg-zinc-700"
+                  className="flex-1 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm font-medium text-white transition-all duration-300 hover:bg-white/[0.06]"
                 >
                   Cancel
                 </button>
 
                 <button
                   onClick={logout}
-                  className="flex-1 rounded-xl bg-red-500 px-4 py-3 text-sm font-medium text-white transition hover:bg-red-400"
+                  className="flex-1 rounded-2xl bg-gradient-to-r from-red-500 to-red-400 px-4 py-3 text-sm font-semibold text-white transition-all duration-300 hover:scale-[1.02]"
                 >
                   Logout
                 </button>
@@ -114,10 +125,14 @@ export default function LoginButton() {
     );
   }
 
+  /*
+    UNAUTHENTICATED
+  */
+
   return (
     <button
       onClick={login}
-      className="rounded-xl bg-indigo-500 px-4 py-3 font-medium text-white transition hover:bg-indigo-400"
+      className="rounded-2xl bg-gradient-to-r from-indigo-500 to-indigo-400 px-5 py-3 font-semibold text-white shadow-lg transition-all duration-300 hover:scale-[1.02]"
     >
       Login with Discord
     </button>

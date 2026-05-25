@@ -11,12 +11,15 @@ import {
 import { useTaskProgress } from "@/hooks/use-task-progress";
 
 import { buildProgressionState } from "@/lib/build-progression-state";
+import LoginButton from "@/components/login-button";
+import { getLevelFromXP } from "@/lib/player-level";
 
 export default function HomePage() {
   const {
-    completedTasks,
-    loaded,
-  } = useTaskProgress();
+  completedTasks,
+  loaded,
+  playerLevelOverride,
+} = useTaskProgress();
 
   const [tasks, setTasks] =
     useState<any[]>([]);
@@ -42,16 +45,54 @@ export default function HomePage() {
     loadTasks();
   }, []);
 
-  const progression =
-    useMemo(() => {
-      return buildProgressionState(
-        tasks,
-        completedTasks
+const inferredXP =
+  completedTasks.reduce(
+    (
+      total,
+      taskId
+    ) => {
+      const task =
+        tasks.find(
+          (t) =>
+            t.id === taskId
+        );
+
+      return (
+        total +
+        (task?.xp || 0)
       );
-    }, [
+    },
+    0
+  );
+
+const inferredLevel =
+  getLevelFromXP(
+    inferredXP
+  );
+
+const effectiveLevel =
+  Math.max(
+    inferredLevel,
+    playerLevelOverride ||
+      1
+  );
+
+/*
+  PROGRESSION
+*/
+
+const progression =
+  useMemo(() => {
+    return buildProgressionState(
       tasks,
       completedTasks,
-    ]);
+      effectiveLevel
+    );
+  }, [
+    tasks,
+    completedTasks,
+    effectiveLevel,
+  ]);
 
   if (!loaded || loading) {
     return (
@@ -71,6 +112,10 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-br from-[#B8895A]/10 to-transparent" />
 
           <div className="relative z-10">
+  <div className="flex justify-end">
+    <LoginButton />
+  </div>
+            
             <p className="text-sm uppercase tracking-[0.3em] text-zinc-500">
               TarkIntel
             </p>
@@ -89,6 +134,7 @@ export default function HomePage() {
             </p>
           </div>
         </div>
+
 
       {/* PROGRESSION OVERVIEW */}
 <div className="grid grid-cols-2 gap-4">
