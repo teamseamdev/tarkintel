@@ -1,16 +1,112 @@
-import { getLiveTasks } from "@/lib/live-tasks";
+import { tarkovDevQuery } from "@/lib/tarkov-dev";
 
-import { normalizeLiveTask } from "@/lib/normalize-live-task";
+export interface LiveTaskRequirement {
+  __typename?: string;
 
-export async function getNormalizedLiveTasks() {
-  const tasks =
-    await getLiveTasks();
+  task?: {
+    id?: string;
 
-  return tasks.map(
-    (task: any) =>
-      normalizeLiveTask(
-        task,
-        tasks
-      )
-  );
+    name?: string;
+  };
+}
+
+export interface LiveTask {
+  id: string;
+
+  name: string;
+
+  wikiLink?: string;
+
+  experience?: number;
+
+  minPlayerLevel?: number;
+
+  kappaRequired?: boolean;
+
+  trader?: {
+    name?: string;
+  };
+
+  objectives?: {
+    id: string;
+
+    description: string;
+  }[];
+
+  map?: {
+    name?: string;
+  };
+
+  taskRequirements?: LiveTaskRequirement[];
+}
+
+interface LiveTaskResponse {
+  tasks?: LiveTask[];
+}
+
+export async function getLiveTasks(): Promise<
+  LiveTask[]
+> {
+  const query = `
+{
+  tasks {
+    id
+
+    name
+
+    wikiLink
+
+    experience
+
+    minPlayerLevel
+
+    kappaRequired
+
+    trader {
+      name
+    }
+
+    objectives {
+      id
+      description
+    }
+
+    map {
+      name
+    }
+
+    taskRequirements {
+      __typename
+
+      ... on TaskStatusRequirement {
+        task {
+          id
+          name
+        }
+      }
+    }
+  }
+}
+`;
+
+  const data: LiveTaskResponse =
+    await tarkovDevQuery(
+      query
+    );
+
+  if (
+    !data ||
+    !Array.isArray(
+      data.tasks
+    )
+  ) {
+    console.error(
+      "INVALID TASK RESPONSE:",
+      data
+    );
+
+    return [];
+  }
+
+  return data.tasks;
 }

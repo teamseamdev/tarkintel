@@ -13,10 +13,19 @@ import { supabase } from "@/lib/supabase";
 
 import { ensureProfile } from "@/lib/profile-sync";
 
+interface UserProfile {
+  id: string;
+
+  email?: string;
+
+  player_level_override?:
+    number | null;
+}
+
 interface AuthContextType {
   user: User | null;
 
-  profile: any;
+  profile: UserProfile | null;
 
   loading: boolean;
 }
@@ -38,8 +47,12 @@ export function AuthProvider({
   const [user, setUser] =
     useState<User | null>(null);
 
-  const [profile, setProfile] =
-    useState<any>(null);
+  const [
+    profile,
+    setProfile,
+  ] = useState<UserProfile | null>(
+    null
+  );
 
   const [loading, setLoading] =
     useState(true);

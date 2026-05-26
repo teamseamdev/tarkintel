@@ -15,15 +15,8 @@ interface ProgressionState {
 export function buildProgressionState(
   tasks: TarkovTask[],
   completedTaskIds: string[],
-  playerLevelOverride?: number | null
+  effectivePlayerLevel: number
 ): ProgressionState {
-  /*
-    MANUAL PLAYER LEVEL
-  */
-
-  const playerLevel =
-    playerLevelOverride || 1;
-
   /*
     COMPLETED TASK SET
   */
@@ -61,20 +54,7 @@ export function buildProgressionState(
     TASK EVALUATION
   */
 
-
   for (const task of tasks) {
-    /*
-      INVALID TASKS
-    */
-
-   
-
-    /*
-      HIDDEN / UNSUPPORTED
-    */
-
-   
-
     /*
       EVENT TASKS
     */
@@ -114,7 +94,7 @@ export function buildProgressionState(
 
     const missingRequirements =
       prerequisites.filter(
-        prerequisiteId =>
+        (prerequisiteId) =>
           !completedSet.has(
             prerequisiteId
           )
@@ -140,28 +120,17 @@ export function buildProgressionState(
       LEVEL GATING
     */
 
-   const minimumLevel =
-  task.minPlayerLevel ||
-  task.levelRequired ||
-  1;
+    const minimumLevel =
+      task.minPlayerLevel ||
+      task.levelRequired ||
+      1;
 
     const levelEligible =
       minimumLevel <=
-      playerLevel;
+      effectivePlayerLevel;
 
+   
 
-        if (
-  task.name ===
-  "First in Line"
-) {
-  console.log({
-    playerLevel,
-    minimumLevel,
-    levelEligible,
-    prerequisites,
-    missingRequirements,
-  });
-}
     /*
       ENRICHED TASK
     */
@@ -207,8 +176,6 @@ export function buildProgressionState(
       LOCKED
     */
 
-
-
     locked.push(
       enrichedTask
     );
@@ -224,7 +191,7 @@ export function buildProgressionState(
     availableTaskIds:
       new Set(
         active.map(
-          task => task.id
+          (task) => task.id
         )
       ),
 

@@ -1,7 +1,21 @@
 import { getLiveItems } from "@/lib/live-items";
 
+interface LiveItem {
+  id: string;
+
+  name: string;
+
+  iconLink?: string;
+
+  avg24hPrice?: number;
+
+  categories?: {
+    name?: string;
+  }[];
+}
+
 export default async function LiveItemsPage() {
-  const items =
+  const items: LiveItem[] =
     await getLiveItems();
 
   return (
@@ -28,7 +42,7 @@ export default async function LiveItemsPage() {
         <div className="flex flex-col gap-4">
           {items
             .slice(0, 50)
-            .map((item: any) => (
+            .map((item) => (
               <div
                 key={item.id}
                 className="glass-card glass-hover rounded-[2rem] p-4"

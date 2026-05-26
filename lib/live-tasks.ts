@@ -1,6 +1,52 @@
 import { tarkovDevQuery } from "@/lib/tarkov-dev";
 
-export async function getLiveTasks() {
+export interface LiveTaskRequirement {
+  __typename?: string;
+
+  task?: {
+    id?: string;
+
+    name?: string;
+  };
+}
+
+export interface LiveTask {
+  id: string;
+
+  name: string;
+
+  wikiLink?: string;
+
+  experience?: number;
+
+  minPlayerLevel?: number;
+
+  kappaRequired?: boolean;
+
+  trader?: {
+    name?: string;
+  };
+
+  objectives?: {
+    id: string;
+
+    description: string;
+  }[];
+
+  map?: {
+    name?: string;
+  };
+
+  taskRequirements?: LiveTaskRequirement[];
+}
+
+interface LiveTaskResponse {
+  tasks?: LiveTask[];
+}
+
+export async function getLiveTasks(): Promise<
+  LiveTask[]
+> {
   const query = `
 {
   tasks {
@@ -43,11 +89,10 @@ export async function getLiveTasks() {
 }
 `;
 
-  const data =
+  const data: LiveTaskResponse =
     await tarkovDevQuery(
       query
     );
-
 
   if (
     !data ||
@@ -62,8 +107,6 @@ export async function getLiveTasks() {
 
     return [];
   }
-
-
 
   return data.tasks;
 }

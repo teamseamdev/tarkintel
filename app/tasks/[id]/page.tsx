@@ -14,6 +14,8 @@ import { useTaskProgress } from "@/hooks/use-task-progress";
 
 import { buildProgressionState } from "@/lib/build-progression-state";
 
+import { getEffectivePlayerLevel } from "@/lib/effective-level";
+
 import { TarkovTask } from "@/types/task";
 
 export default function TaskPage() {
@@ -27,6 +29,7 @@ export default function TaskPage() {
     toggleTask,
     isTaskCompleted,
     loaded,
+    playerLevelOverride,
   } = useTaskProgress();
 
   const [tasks, setTasks] =
@@ -67,6 +70,24 @@ export default function TaskPage() {
   }, []);
 
   /*
+    EFFECTIVE LEVEL
+  */
+
+const {
+  effectiveLevel,
+} = useMemo(() => {
+  return getEffectivePlayerLevel(
+    tasks,
+    completedTasks,
+    playerLevelOverride
+  );
+}, [
+  tasks,
+  completedTasks,
+  playerLevelOverride,
+]);
+
+  /*
     PROGRESSION ENGINE
   */
 
@@ -74,11 +95,13 @@ export default function TaskPage() {
     useMemo(() => {
       return buildProgressionState(
         tasks,
-        completedTasks
+        completedTasks,
+        effectiveLevel
       );
     }, [
       tasks,
       completedTasks,
+      effectiveLevel,
     ]);
 
   /*
@@ -279,7 +302,7 @@ export default function TaskPage() {
               ?.length ? (
               task.objectives.map(
                 (
-                  objective: any,
+                  objective,
                   index: number
                 ) => (
                   <div
@@ -287,8 +310,7 @@ export default function TaskPage() {
                     className="rounded-2xl border border-white/5 bg-white/[0.03] px-4 py-3 text-sm text-zinc-300"
                   >
                     •{" "}
-                    {objective.description ||
-                      "Objective"}
+                    {objective.description}
                   </div>
                 )
               )

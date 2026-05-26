@@ -1,11 +1,15 @@
 import { TarkovTask } from "@/types/task";
 
+import {
+  LiveTask,
+} from "@/lib/live-task-source";
+
 export function normalizeLiveTask(
-  task: any,
-  allTasks: any[] = []
+  task: LiveTask,
+  allTasks: LiveTask[] = []
 ): TarkovTask {
   const minPlayerLevel =
-    task.minPlayerLevel || 1;
+    task.minPlayerLevel ?? 1;
 
   /*
     VALID TASK IDS
@@ -28,14 +32,19 @@ export function normalizeLiveTask(
       []
     )
       .filter(
-        (requirement: any) =>
+        (
+          requirement
+        ) =>
           requirement.__typename ===
             "TaskStatusRequirement" &&
           requirement.task?.id
       )
       .map(
-        (requirement: any) =>
-          requirement.task.id
+        (
+          requirement
+        ) =>
+          requirement.task!
+            .id!
       );
 
   /*
@@ -45,7 +54,7 @@ export function normalizeLiveTask(
 
   const filteredPrerequisites =
     rawPrerequisites.filter(
-      (id: string) =>
+      (id) =>
         validTaskIds.has(id)
     );
 
@@ -85,17 +94,17 @@ export function normalizeLiveTask(
       task.wikiLink,
 
     experience:
-      task.experience || 0,
+      task.experience ?? 0,
 
     xp:
-      task.experience || 0,
+      task.experience ?? 0,
 
     objectives:
       task.objectives || [],
 
     prerequisites,
 
-    maps: task.map
+    maps: task.map?.name
       ? [task.map.name]
       : [],
 
@@ -105,13 +114,13 @@ export function normalizeLiveTask(
     minPlayerLevel,
 
     kappaRequired:
-      task.kappaRequired ||
+      task.kappaRequired ??
       false,
 
     isEvent:
       task.name
         ?.toLowerCase()
-        .includes("event") ||
+        .includes("event") ??
       false,
 
     isLightkeeper:

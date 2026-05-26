@@ -5,7 +5,7 @@ import { items } from "@/data/items/items";
 import {
   getItemPriority,
   getTasksByItem,
-} from "@/lib/live-item-intelligence";
+} from "@/lib/item-intelligence";
 
 import {
   createItemSlug,

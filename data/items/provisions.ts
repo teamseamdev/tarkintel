@@ -1,8 +1,8 @@
-import { Item } from "@/types/item";
+import { TarkovItem } from "@/types/item";
 
 export const provisionItems: Record<
   string,
-  Item
+  TarkovItem
 > = {
   iskra: {
     id: "iskra",

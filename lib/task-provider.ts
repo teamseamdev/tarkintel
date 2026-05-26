@@ -1,31 +1,27 @@
 import { cache } from "react";
 
-import { getNormalizedLiveTasks } from "@/lib/live-task-source";
+import {
+  getLiveTasks,
+} from "@/lib/live-task-source";
+
+import { normalizeLiveTask } from "@/lib/normalize-live-task";
 
 import { TarkovTask } from "@/types/task";
 
 export const getTasks =
-  cache(async (): Promise<
-    TarkovTask[]
-  > => {
-    return await getNormalizedLiveTasks();
-  });
-
-export const getTaskById =
   cache(
-    async (
-      id: string
-    ): Promise<
-      TarkovTask | undefined
+    async (): Promise<
+      TarkovTask[]
     > => {
-      const tasks =
-        await getTasks();
+      const liveTasks =
+        await getLiveTasks();
 
-      return tasks.find(
-        (
-          task: TarkovTask
-        ) =>
-          task.id === id
+      return liveTasks.map(
+        (task) =>
+          normalizeLiveTask(
+            task,
+            liveTasks
+          )
       );
     }
   );

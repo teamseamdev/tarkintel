@@ -1,6 +1,9 @@
 import Link from "next/link";
 
-import { TarkovTask } from "@/types/task";
+import {
+  TarkovObjective,
+  TarkovTask,
+} from "@/types/task";
 
 interface TaskCardProps {
   task: TarkovTask;
@@ -67,9 +70,9 @@ export function TaskCard({
           </p>
 
           <div className="flex flex-col gap-3">
-            {task.objectives?.map(
+            {task.objectives.map(
               (
-                objective: any,
+                objective: TarkovObjective,
                 index: number
               ) => (
                 <div
@@ -88,7 +91,7 @@ export function TaskCard({
 
         {/* Meta */}
         <div className="mt-6 flex flex-wrap gap-2">
-          {task.levelRequired && (
+          {task.levelRequired > 0 && (
             <div className="rounded-full border border-white/10 px-3 py-1 text-xs text-zinc-400">
               LV{" "}
               {
@@ -97,7 +100,7 @@ export function TaskCard({
             </div>
           )}
 
-          {task.maps?.map(
+          {task.maps.map(
             (map: string) => (
               <div
                 key={map}
@@ -108,7 +111,7 @@ export function TaskCard({
             )
           )}
 
-          {task.xp && (
+          {task.xp > 0 && (
             <div className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
               {task.xp.toLocaleString()}{" "}
               XP

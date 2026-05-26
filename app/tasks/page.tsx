@@ -27,9 +27,9 @@ import { TaskCard } from "@/components/tasks/TaskCard";
 
 export default function TasksPage() {
 const {
-  completedTasks,
   toggleTask,
   isTaskCompleted,
+  completedTasks,
   loaded,
   playerLevelOverride,
   setPlayerLevelOverride,
@@ -96,16 +96,23 @@ const {
 const {
   inferredLevel,
   effectiveLevel,
-} =
-  getEffectivePlayerLevel(
+} = useMemo(() => {
+  return getEffectivePlayerLevel(
     tasks,
     completedTasks,
     playerLevelOverride
   );
+}, [
+  tasks,
+  completedTasks,
+  playerLevelOverride,
+]);
   /*
     PROGRESSION ENGINE
   */
 
+
+    
   const progression =
     useMemo(() => {
       return buildProgressionState(
@@ -125,10 +132,8 @@ const {
 
   const filteredTasks =
     useMemo(() => {
-      let baseTasks:
-        | TarkovTask[]
-        | any[] =
-        progression.active;
+      let baseTasks: TarkovTask[] =
+  progression.active;
 
       /*
         VIEW MODES
@@ -173,7 +178,7 @@ const {
 
         filtered =
           filtered.filter(
-            (task: any) => {
+            (task: TarkovTask) => {
               const taskName =
                 task.name?.toLowerCase() ||
                 "";
@@ -299,10 +304,10 @@ const {
   visibleCount={sortedTasks.length}
 />
 
-       {/* Player State */}
+
+{/* Player State */}
 <div className="glass-card rounded-[2rem] p-5">
   <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
-    {/* Current Effective Level */}
     <div>
       <p className="text-sm text-zinc-500">
         PMC Level
@@ -317,83 +322,59 @@ const {
         intelligence and
         level-gated tasks.
       </p>
+
+      <p className="mt-2 text-xs text-zinc-500">
+        Inferred Level:{" "}
+        {inferredLevel}
+      </p>
     </div>
 
-    {/* Manual Override */}
     <div className="flex flex-col gap-3">
       <p className="text-sm text-zinc-500">
         Set Your PMC Level
       </p>
 
-      <p className="text-xs text-zinc-500">
-        Inferred Level:{" "}
-        {inferredLevel}
-      </p>
-
-      <input
-        type="text"
-        inputMode="numeric"
-        pattern="[0-9]*"
+      <select
         value={
-          playerLevelOverride?.toString() ??
-          effectiveLevel.toString()
+          playerLevelOverride ||
+          effectiveLevel
         }
         onChange={(event) => {
-          const raw =
-            event.target.value.replace(
-              /[^0-9]/g,
-              ""
-            );
-
-          /*
-            ALLOW EMPTY
-            DURING MOBILE EDITING
-          */
-
-          if (raw === "") {
-            return;
-          }
-
-          const parsed =
-            parseInt(
-              raw,
-              10
-            );
-
-          if (
-            Number.isNaN(
-              parsed
-            )
-          ) {
-            return;
-          }
-
-          /*
-            CLAMP
-          */
-
-          const clamped =
-            Math.max(
-              inferredLevel,
-              Math.min(
-                79,
-                parsed
-              )
+          const selectedLevel =
+            Number(
+              event.target.value
             );
 
           setPlayerLevelOverride(
-            clamped
+            selectedLevel
           );
         }}
-        className="w-32 rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-3 text-lg text-white outline-none transition-all duration-300 focus:border-primary"
-      />
+        className="w-40 rounded-2xl border border-white/10 bg-[#111418] px-4 py-3 text-lg text-white outline-none transition-all duration-300 focus:border-primary"
+      >
+        {Array.from(
+          { length: 79 },
+          (_, index) =>
+            index + 1
+        ).map((level) => (
+          <option
+            key={level}
+            value={level}
+          >
+            Level {level}
+          </option>
+        ))}
+      </select>
 
-      <p className="text-xs text-zinc-600">
-        Effective level always
-        uses the higher of:
-        inferred progression or
-        manual override.
-      </p>
+      <button
+        onClick={() =>
+          setPlayerLevelOverride(
+            inferredLevel
+          )
+        }
+        className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm font-medium text-zinc-300 transition-all duration-300 hover:bg-white/[0.06]"
+      >
+        Reset To Inferred
+      </button>
     </div>
   </div>
 </div>
@@ -520,7 +501,7 @@ const {
 
   <div className="flex max-h-[70vh] flex-col gap-5 overflow-y-auto pr-2">
     {sortedTasks.map(
-      (task: any) => {
+      (task: TarkovTask) => {
         const completed =
           isTaskCompleted(
             task.id

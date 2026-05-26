@@ -1,56 +1,72 @@
 export interface TarkovObjective {
-  id?: string;
+  id: string;
 
-  description?: string;
+  description: string;
 }
 
 export interface TarkovTask {
+  /*
+    CORE TASK INFO
+  */
+
   id: string;
 
   name: string;
 
-  trader?: string | null;
-
-  map?: string;
-
-  maps?: string[];
+  trader: string | null;
 
   wikiLink?: string;
 
-  experience?: number;
+  /*
+    MAPS
+  */
 
-  xp?: number;
+  map?: string;
+
+  maps: string[];
+
+  /*
+    XP / REWARDS
+  */
+
+  experience: number;
+
+  xp: number;
 
   /*
     LIVE OBJECTIVES
-    FROM TARKOV.DEV
+    NORMALIZED FROM TARKOV.DEV
   */
-  objectives?: TarkovObjective[];
+
+  objectives: TarkovObjective[];
 
   /*
     PROGRESSION
   */
-  prerequisites?: string[];
+
+  prerequisites: string[];
 
   missingRequirements?: string[];
 
   /*
     TASK META
   */
+
   factionName?: string;
 
-  kappaRequired?: boolean;
+  kappaRequired: boolean;
 
-  levelRequired?: number;
+  levelRequired: number;
 
-  minPlayerLevel?: number;
+  minPlayerLevel: number;
 
   /*
     SPECIAL TASK TYPES
   */
-  isEvent?: boolean;
 
-  isLightkeeper?: boolean;
+  isEvent: boolean;
 
-  isAvailableFromStart?: boolean;
+  isLightkeeper: boolean;
+
+  isAvailableFromStart: boolean;
 }

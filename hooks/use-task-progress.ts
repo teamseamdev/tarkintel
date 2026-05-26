@@ -18,6 +18,12 @@ const STORAGE_KEY =
 const LEVEL_OVERRIDE_KEY =
   "tarkintel-level-override";
 
+interface TaskProgressRecord {
+  task_id: string;
+
+  completed: boolean;
+}
+
 export function useTaskProgress() {
   const { profile } =
     useAuth();
@@ -40,6 +46,15 @@ export function useTaskProgress() {
     []
   );
 
+  /*
+    INITIALIZATION STATE
+  */
+
+  const [
+    initializing,
+    setInitializing,
+  ] = useState(true);
+
   const [loaded, setLoaded] =
     useState(false);
 
@@ -53,25 +68,8 @@ export function useTaskProgress() {
     async function loadProgress() {
       try {
         /*
-          LOCAL TASKS
-        */
-
-        const saved =
-          localStorage.getItem(
-            STORAGE_KEY
-          );
-
-        if (
-          saved &&
-          !cancelled
-        ) {
-          setCompletedTasks(
-            JSON.parse(saved)
-          );
-        }
-
-        /*
-          LEVEL
+          LEVEL OVERRIDE
+          ALWAYS LOCAL
         */
 
         const savedLevel =
@@ -91,7 +89,8 @@ export function useTaskProgress() {
         }
 
         /*
-          CLOUD LOAD
+          AUTHENTICATED USER
+          CLOUD = SOURCE OF TRUTH
         */
 
         if (profile?.id) {
@@ -110,13 +109,13 @@ export function useTaskProgress() {
             cloudProgress
               .filter(
                 (
-                  task: any
+                  task: TaskProgressRecord
                 ) =>
                   task.completed
               )
               .map(
                 (
-                  task: any
+                  task: TaskProgressRecord
                 ) =>
                   task.task_id
               );
@@ -124,6 +123,38 @@ export function useTaskProgress() {
           setCompletedTasks(
             completed
           );
+
+          /*
+            OPTIONAL CACHE
+          */
+
+          localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify(
+              completed
+            )
+          );
+        }
+
+        /*
+          GUEST USER
+          LOCAL = SOURCE OF TRUTH
+        */
+
+        else {
+          const saved =
+            localStorage.getItem(
+              STORAGE_KEY
+            );
+
+          if (
+            saved &&
+            !cancelled
+          ) {
+            setCompletedTasks(
+              JSON.parse(saved)
+            );
+          }
         }
       } catch (error) {
         console.error(
@@ -134,6 +165,10 @@ export function useTaskProgress() {
         if (
           !cancelled
         ) {
+          setInitializing(
+            false
+          );
+
           setLoaded(true);
         }
       }
@@ -148,10 +183,15 @@ export function useTaskProgress() {
 
   /*
     LOCAL SAVE
+    GUEST USERS ONLY
   */
 
   useEffect(() => {
     if (!loaded) return;
+
+    if (profile?.id) {
+      return;
+    }
 
     localStorage.setItem(
       STORAGE_KEY,
@@ -162,6 +202,7 @@ export function useTaskProgress() {
   }, [
     completedTasks,
     loaded,
+    profile?.id,
   ]);
 
   /*
@@ -243,6 +284,8 @@ export function useTaskProgress() {
     isTaskCompleted,
 
     loaded,
+
+    initializing,
 
     playerLevelOverride,
 

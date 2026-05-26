@@ -1,8 +1,8 @@
-import { Item } from "@/types/item";
+import { TarkovItem } from "@/types/item";
 
 export const barterItems: Record<
   string,
-  Item
+  TarkovItem
 > = {
   bolts: {
     id: "bolts",

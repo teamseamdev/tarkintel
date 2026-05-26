@@ -44,11 +44,11 @@ export function getEffectivePlayerLevel(
     EFFECTIVE LEVEL
   */
 
-  const effectiveLevel =
-    Math.max(
-      inferredLevel,
-      manualLevel || 1
-    );
+ const effectiveLevel =
+  Math.max(
+    inferredLevel,
+    manualLevel ?? 1
+  );
 
   return {
     inferredXP,

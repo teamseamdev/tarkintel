@@ -1,8 +1,13 @@
 import { supabase } from "@/lib/supabase";
 
+interface ProfileData {
+  player_level_override:
+    number | null;
+}
+
 export async function loadProfile(
   profileId: string
-) {
+): Promise<ProfileData | null> {
   const { data, error } =
     await supabase
       .from("profiles")
@@ -28,7 +33,7 @@ export async function updatePlayerLevelOverride(
   profileId: string,
 
   level: number | null
-) {
+): Promise<void> {
   const { error } =
     await supabase
       .from("profiles")

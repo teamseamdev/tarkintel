@@ -12,7 +12,7 @@ import {
 
 import {
   getItemPriority,
-} from "@/lib/live-item-intelligence";
+} from "@/lib/item-intelligence";
 
 export default function ItemsPage() {
   const [search, setSearch] =

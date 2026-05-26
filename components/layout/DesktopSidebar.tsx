@@ -5,44 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import {
-  House,
-  ClipboardList,
-  Package,
-  Hammer,
-  User,
-} from "lucide-react";
-
-const navItems = [
-  {
-    label: "Home",
-    href: "/",
-    icon: House,
-  },
-
-  {
-    label: "Tasks",
-    href: "/tasks",
-    icon: ClipboardList,
-  },
-
-  {
-    label: "Items",
-    href: "/items",
-    icon: Package,
-  },
-
-  {
-    label: "Hideout",
-    href: "/hideout",
-    icon: Hammer,
-  },
-
-  {
-    label: "Profile",
-    href: "/profile",
-    icon: User,
-  },
-];
+  navigationItems,
+} from "@/lib/navigation";
 
 export function DesktopSidebar() {
   const pathname =
@@ -64,7 +28,7 @@ export function DesktopSidebar() {
 
       {/* Navigation */}
       <div className="mt-10 flex flex-col gap-2">
-        {navItems.map(
+        {navigationItems.map(
           (item) => {
             const Icon =
               item.icon;
