@@ -8,7 +8,15 @@ export async function ensureProfile(
   user: User
 ) {
   /*
-    DISCORD DATA
+    PROFILE ID
+    MUST MATCH AUTH UID
+  */
+
+  const profileId =
+    user.id;
+
+  /*
+    DISCORD INFO
   */
 
   const discordId =
@@ -27,21 +35,12 @@ export async function ensureProfile(
       ?.avatar_url || null;
 
   /*
-    IMPORTANT:
-    PROFILE ID MUST MATCH
-    SUPABASE AUTH USER ID
-  */
-
-  const profileId =
-    user.id;
-
-  /*
-    EXISTING PROFILE
+    FIND PROFILE
   */
 
   const {
-    data: existing,
-    error: existingError,
+    data: existingProfiles,
+    error: fetchError,
   } =
     await supabase
       .from("profiles")
@@ -50,21 +49,28 @@ export async function ensureProfile(
         "id",
         profileId
       )
-      .single();
+      .limit(1);
+
+  if (fetchError) {
+    console.error(
+      "PROFILE FETCH ERROR:",
+      fetchError
+    );
+  }
 
   /*
-    FOUND
+    EXISTING
   */
 
-  if (
-    existing &&
-    !existingError
-  ) {
+  const existing =
+    existingProfiles?.[0];
+
+  if (existing) {
     return existing;
   }
 
   /*
-    CREATE PROFILE
+    CREATE
   */
 
   const {
@@ -74,10 +80,6 @@ export async function ensureProfile(
     await supabase
       .from("profiles")
       .insert({
-        /*
-          CRITICAL FIX
-        */
-
         id: profileId,
 
         discord_id:
@@ -93,11 +95,30 @@ export async function ensureProfile(
 
   if (error) {
     console.error(
-      "PROFILE CREATION FAILED:",
+      "PROFILE CREATION ERROR:",
       error
     );
 
-    return null;
+    /*
+      RETRY FETCH
+    */
+
+    const {
+      data: retryProfiles,
+    } =
+      await supabase
+        .from("profiles")
+        .select("*")
+        .eq(
+          "id",
+          profileId
+        )
+        .limit(1);
+
+    return (
+      retryProfiles?.[0] ||
+      null
+    );
   }
 
   return data;

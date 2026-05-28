@@ -25,35 +25,33 @@ import type {
   TarkovItem,
 } from "@/types/item";
 
-export const revalidate = 3600;
+export const revalidate =
+  3600;
 
 export const getItems =
-  cache(async (): Promise<
-    TarkovItem[]
-  > => {
+  cache(
+    async (): Promise<
+      TarkovItem[]
+    > => {
       /*
-        LIVE ITEMS
+        PARALLEL FETCH
       */
 
-      const liveItems =
-        await getLiveItems();
+      const [
+        liveItems,
+        tasks,
+        hideoutModules,
+      ] =
+        await Promise.all([
+          getLiveItems(),
+
+          getTasks(),
+
+          getHideoutModules(),
+        ]);
 
       /*
-        LIVE TASKS
-      */
-
-      const tasks =
-        (await getTasks()) as RelatedTask[];
-
-      /*
-        LIVE HIDEOUT
-      */
-
-      const hideoutModules =
-        await getHideoutModules();
-
-      /*
-        REQUIREMENT MAP
+        MAPS
       */
 
       const hideoutRequirementsMap =
@@ -62,33 +60,190 @@ export const getItems =
           HideoutRequirement[]
         >();
 
+      const hideoutModulesMap =
+        new Map<
+          string,
+          HideoutModuleReference[]
+        >();
+
+      const relatedTasksMap =
+        new Map<
+          string,
+          {
+            id: string;
+
+            name: string;
+          }[]
+        >();
+
+      /*
+        BUILD HIDEOUT MAPS
+      */
+
       for (const module of hideoutModules) {
         for (const level of module.levels) {
           for (const requirement of level.requirements) {
-            const existing =
+            /*
+              REQUIREMENTS
+            */
+
+            const existingRequirements =
               hideoutRequirementsMap.get(
                 requirement.itemId
               ) ?? [];
 
-            existing.push({
-              itemId:
-                requirement.itemId,
+            existingRequirements.push(
+              {
+                itemId:
+                  requirement.itemId,
 
-              itemName:
-                requirement.itemName,
+                itemName:
+                  requirement.itemName,
 
-              stationName:
-                module.name,
+                stationName:
+                  module.name,
 
-              stationLevel:
-                level.level,
+                stationLevel:
+                  level.level,
 
-              count:
-                requirement.count,
-            });
+                count:
+                  requirement.count,
+              }
+            );
 
             hideoutRequirementsMap.set(
               requirement.itemId,
+              existingRequirements
+            );
+
+            /*
+              MODULES
+            */
+
+            const existingModules =
+              hideoutModulesMap.get(
+                requirement.itemId
+              ) ?? [];
+
+            /*
+              PREVENT DUPES
+            */
+
+            const alreadyExists =
+              existingModules.some(
+                (
+                  existing
+                ) =>
+                  existing.id ===
+                  module.id
+              );
+
+            if (
+              !alreadyExists
+            ) {
+              existingModules.push(
+                {
+                  id:
+                    module.id,
+
+                  name:
+                    module.name,
+
+                  level:
+                    level.level,
+                }
+              );
+
+              hideoutModulesMap.set(
+                requirement.itemId,
+                existingModules
+              );
+            }
+          }
+        }
+      }
+
+      /*
+        BUILD TASK MAP
+      */
+
+      for (const task of tasks as RelatedTask[]) {
+        for (const objective of task.objectives ??
+          []) {
+          const description =
+            (
+              objective.description ||
+              ""
+            ).toLowerCase();
+
+          /*
+            IGNORE GENERIC
+          */
+
+          if (
+            description.includes(
+              "sell any"
+            ) ||
+            description.includes(
+              "turn in any"
+            ) ||
+            description.includes(
+              "hand over any"
+            )
+          ) {
+            continue;
+          }
+
+          const itemNames =
+            new Set<
+              string
+            >();
+
+          /*
+            DIRECT ITEM
+          */
+
+          if (
+            objective.item
+              ?.name
+          ) {
+            itemNames.add(
+              objective.item
+                .name
+            );
+          }
+
+          /*
+            MULTI ITEMS
+          */
+
+          for (const objectiveItem of objective.items ??
+            []) {
+            itemNames.add(
+              objectiveItem.name
+            );
+          }
+
+          /*
+            MAP TASKS
+          */
+
+          for (const itemName of itemNames) {
+            const existing =
+              relatedTasksMap.get(
+                itemName
+              ) ?? [];
+
+            existing.push({
+              id:
+                task.id,
+
+              name:
+                task.name,
+            });
+
+            relatedTasksMap.set(
+              itemName,
               existing
             );
           }
@@ -96,132 +251,40 @@ export const getItems =
       }
 
       /*
-        NORMALIZED ITEMS
+        NORMALIZE ITEMS
       */
 
       const items: TarkovItem[] =
         liveItems.map(
           (item) => {
+            const normalized =
+              normalizeLiveItem(
+                item,
+                {
+                  hideoutRequirements:
+                    hideoutRequirementsMap.get(
+                      item.id
+                    ) ?? [],
+
+                  hideoutModules:
+                    hideoutModulesMap.get(
+                      item.id
+                    ) ?? [],
+                }
+              );
+
             /*
-              RELATED MODULES
+              TASKS
             */
 
-            const relatedModules: HideoutModuleReference[] =
-              hideoutModules
-                .filter(
-                  (module) =>
-                    module.levels.some(
-                      (level) =>
-                        level.requirements.some(
-                          (
-                            requirement
-                          ) =>
-                            requirement.itemId ===
-                            item.id
-                        )
-                    )
-                )
-                .map(
-                  (module) => ({
-                    id:
-                      module.id,
+            normalized.relatedTasks =
+              relatedTasksMap.get(
+                item.name
+              ) ?? [];
 
-                    name:
-                      module.name,
-
-                    level:
-                      module.levels.length,
-                  })
-                );
-
-            return normalizeLiveItem(
-              item,
-              {
-                hideoutRequirements:
-                  hideoutRequirementsMap.get(
-                    item.id
-                  ) ?? [],
-
-                hideoutModules:
-                  relatedModules,
-              }
-            );
+            return normalized;
           }
         );
-
-      /*
-        TASK ENRICHMENT
-      */
-
-      for (const item of items) {
-        const relatedTasks =
-          tasks.filter(
-            (task) =>
-              task.objectives?.some(
-                (
-                  objective: TaskObjective
-                ) => {
-                  const description =
-                    (
-                      objective.description ||
-                      ""
-                    ).toLowerCase();
-
-                  const directMatch =
-                    objective.item
-                      ?.name ===
-                    item.name;
-
-                  const multiMatch =
-                    objective.items?.some(
-                      (
-                        objectiveItem: TaskObjectiveItem
-                      ) =>
-                        objectiveItem.name ===
-                        item.name
-                    );
-
-                  if (
-                    !directMatch &&
-                    !multiMatch
-                  ) {
-                    return false;
-                  }
-
-                  /*
-                    IGNORE GENERIC
-                  */
-
-                  if (
-                    description.includes(
-                      "sell any"
-                    ) ||
-                    description.includes(
-                      "turn in any"
-                    ) ||
-                    description.includes(
-                      "hand over any"
-                    )
-                  ) {
-                    return false;
-                  }
-
-                  return true;
-                }
-              )
-          );
-
-        item.relatedTasks =
-          relatedTasks.map(
-            (task) => ({
-              id:
-                task.id,
-
-              name:
-                task.name,
-            })
-          );
-      }
 
       return items;
     }
