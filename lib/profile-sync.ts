@@ -1,10 +1,16 @@
 import { supabase } from "@/lib/supabase";
 
-import { User } from "@supabase/supabase-js";
+import type {
+  User,
+} from "@supabase/supabase-js";
 
 export async function ensureProfile(
   user: User
 ) {
+  /*
+    DISCORD DATA
+  */
+
   const discordId =
     user.user_metadata
       ?.provider_id ||
@@ -20,36 +26,74 @@ export async function ensureProfile(
     user.user_metadata
       ?.avatar_url || null;
 
-  const { data: existing } =
+  /*
+    IMPORTANT:
+    PROFILE ID MUST MATCH
+    SUPABASE AUTH USER ID
+  */
+
+  const profileId =
+    user.id;
+
+  /*
+    EXISTING PROFILE
+  */
+
+  const {
+    data: existing,
+    error: existingError,
+  } =
     await supabase
       .from("profiles")
       .select("*")
       .eq(
-        "discord_id",
-        discordId
+        "id",
+        profileId
       )
       .single();
 
-  if (existing) {
+  /*
+    FOUND
+  */
+
+  if (
+    existing &&
+    !existingError
+  ) {
     return existing;
   }
 
-  const { data, error } =
+  /*
+    CREATE PROFILE
+  */
+
+  const {
+    data,
+    error,
+  } =
     await supabase
       .from("profiles")
       .insert({
-        discord_id: discordId,
+        /*
+          CRITICAL FIX
+        */
+
+        id: profileId,
+
+        discord_id:
+          discordId,
 
         username,
 
-        avatar_url: avatarUrl,
+        avatar_url:
+          avatarUrl,
       })
       .select()
       .single();
 
   if (error) {
     console.error(
-      "Profile creation failed:",
+      "PROFILE CREATION FAILED:",
       error
     );
 

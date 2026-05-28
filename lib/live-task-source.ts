@@ -3,11 +3,43 @@ import { tarkovDevQuery } from "@/lib/tarkov-dev";
 export interface LiveTaskRequirement {
   __typename?: string;
 
+  /*
+    TASK REQUIREMENT
+  */
+
   task?: {
     id?: string;
 
     name?: string;
   };
+}
+
+export interface LiveTaskObjective {
+  id: string;
+
+  description?: string;
+
+  type?: string;
+
+  /*
+    ITEM OBJECTIVES
+  */
+
+  item?: {
+    id?: string;
+
+    name?: string;
+  };
+
+  items?: {
+    id?: string;
+
+    name?: string;
+  }[];
+
+  count?: number;
+
+  foundInRaid?: boolean;
 }
 
 export interface LiveTask {
@@ -27,17 +59,29 @@ export interface LiveTask {
     name?: string;
   };
 
-  objectives?: {
-    id: string;
-
-    description: string;
-  }[];
+  objectives?: LiveTaskObjective[];
 
   map?: {
     name?: string;
   };
 
+  /*
+    TASK RELATIONSHIPS
+  */
+
   taskRequirements?: LiveTaskRequirement[];
+
+  /*
+    KEY REQUIREMENTS
+  */
+
+  neededKeys?: {
+    keys?: {
+      id?: string;
+
+      name?: string;
+    }[];
+  };
 }
 
 interface LiveTaskResponse {
@@ -68,7 +112,33 @@ export async function getLiveTasks(): Promise<
 
     objectives {
       id
+
       description
+
+      type
+
+      ... on TaskObjectiveItem {
+        item {
+          id
+          name
+        }
+
+        items {
+          id
+          name
+        }
+
+        count
+
+        foundInRaid
+      }
+    }
+
+    neededKeys {
+      keys {
+        id
+        name
+      }
     }
 
     map {
@@ -77,6 +147,8 @@ export async function getLiveTasks(): Promise<
 
     taskRequirements {
       __typename
+
+      # TASK CHAIN
 
       ... on TaskStatusRequirement {
         task {

@@ -4,6 +4,18 @@ export interface TarkovObjective {
   description: string;
 }
 
+export interface TarkovTaskRequirement {
+  item?: {
+    id?: string;
+
+    name?: string;
+  };
+
+  count?: number;
+
+  foundInRaid?: boolean;
+}
+
 export interface TarkovTask {
   /*
     CORE TASK INFO
@@ -47,6 +59,13 @@ export interface TarkovTask {
   prerequisites: string[];
 
   missingRequirements?: string[];
+
+  /*
+    ITEM REQUIREMENTS
+    (HANDOVER TASKS)
+  */
+
+  taskRequirements?: TarkovTaskRequirement[];
 
   /*
     TASK META

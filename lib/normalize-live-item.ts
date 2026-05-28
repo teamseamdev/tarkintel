@@ -4,89 +4,196 @@ import {
 
 import {
   TarkovItem,
+  HideoutRequirement,
 } from "@/types/item";
 
 function normalizeCategory(
-  category?: string
+  categories?: {
+    name?: string;
+  }[]
 ): TarkovItem["category"] {
-  const normalized =
-    category
-      ?.toLowerCase()
-      .trim();
+  /*
+    ALL CATEGORY NAMES
+  */
+
+  const categoryNames =
+    (
+      categories || []
+    ).map((category) =>
+      (
+        category.name || ""
+      ).toLowerCase()
+    );
+
+  /*
+    WEAPONS
+  */
 
   if (
-    normalized?.includes(
-      "ammo"
-    )
-  ) {
-    return "ammo";
-  }
-
-  if (
-    normalized?.includes(
-      "weapon"
+    categoryNames.some(
+      (name) =>
+        name.includes(
+          "weapon"
+        ) ||
+        name.includes(
+          "assault rifle"
+        ) ||
+        name.includes(
+          "marksman rifle"
+        ) ||
+        name.includes(
+          "submachine gun"
+        ) ||
+        name.includes(
+          "shotgun"
+        ) ||
+        name.includes(
+          "sniper rifle"
+        ) ||
+        name.includes(
+          "machine gun"
+        ) ||
+        name.includes(
+          "pistol"
+        )
     )
   ) {
     return "weapon";
   }
 
+  /*
+    AMMO
+  */
+
   if (
-    normalized?.includes(
-      "armor"
+    categoryNames.some(
+      (name) =>
+        name.includes(
+          "ammo"
+        )
+    )
+  ) {
+    return "ammo";
+  }
+
+  /*
+    ARMOR
+  */
+
+  if (
+    categoryNames.some(
+      (name) =>
+        name.includes(
+          "armor"
+        ) ||
+        name.includes(
+          "helmet"
+        ) ||
+        name.includes(
+          "rig"
+        )
     )
   ) {
     return "armor";
   }
 
+  /*
+    MEDICAL
+  */
+
   if (
-    normalized?.includes(
-      "medical"
+    categoryNames.some(
+      (name) =>
+        name.includes(
+          "medical"
+        ) ||
+        name.includes(
+          "med"
+        )
     )
   ) {
     return "medical";
   }
 
+  /*
+    FOOD / PROVISIONS
+  */
+
   if (
-    normalized?.includes(
-      "food"
-    ) ||
-    normalized?.includes(
-      "drink"
-    ) ||
-    normalized?.includes(
-      "provision"
+    categoryNames.some(
+      (name) =>
+        name.includes(
+          "food"
+        ) ||
+        name.includes(
+          "drink"
+        ) ||
+        name.includes(
+          "provision"
+        )
     )
   ) {
     return "provision";
   }
 
+  /*
+    ELECTRONICS
+  */
+
   if (
-    normalized?.includes(
-      "electronics"
+    categoryNames.some(
+      (name) =>
+        name.includes(
+          "electronics"
+        )
     )
   ) {
     return "electronics";
   }
 
+  /*
+    BUILDING
+  */
+
   if (
-    normalized?.includes(
-      "building"
+    categoryNames.some(
+      (name) =>
+        name.includes(
+          "building"
+        ) ||
+        name.includes(
+          "material"
+        )
     )
   ) {
     return "building";
   }
 
+  /*
+    KEYS
+  */
+
   if (
-    normalized?.includes(
-      "key"
+    categoryNames.some(
+      (name) =>
+        name.includes(
+          "key"
+        )
     )
   ) {
     return "key";
   }
 
+  /*
+    BARTER
+  */
+
   if (
-    normalized?.includes(
-      "barter"
+    categoryNames.some(
+      (name) =>
+        name.includes(
+          "barter"
+        )
     )
   ) {
     return "barter";
@@ -96,12 +203,46 @@ function normalizeCategory(
 }
 
 export function normalizeLiveItem(
-  item: LiveItem
+  item: LiveItem,
+
+ options?: {
+  hideoutRequirements?: HideoutRequirement[];
+
+  hideoutModules?: any[];
+}
 ): TarkovItem {
+  /*
+    HIDEOUT INTELLIGENCE
+  */
+
+  const hideoutRequirements =
+    options?.hideoutRequirements ??
+    [];
+
+    const hideoutModules =
+  options?.hideoutModules ??
+  [];
+
+  const totalHideoutRequired =
+    hideoutRequirements.reduce(
+      (
+        total,
+        requirement
+      ) =>
+        total +
+        requirement.count,
+      0
+    );
+
+  const requiredForHideout =
+    hideoutRequirements.length >
+    0;
+
   return {
     /*
       CORE
     */
+
     id: item.id,
 
     name: item.name,
@@ -115,15 +256,16 @@ export function normalizeLiveItem(
     /*
       CLASSIFICATION
     */
+
     category:
       normalizeCategory(
-        item.categories?.[0]
-          ?.name
+        item.categories
       ),
 
     /*
       ECONOMY
     */
+
     avgPrice:
       item.avg24hPrice,
 
@@ -141,6 +283,7 @@ export function normalizeLiveItem(
     /*
       DIMENSIONS
     */
+
     width: item.width,
 
     height: item.height,
@@ -150,6 +293,7 @@ export function normalizeLiveItem(
     /*
       MEDIA
     */
+
     icon:
       item.iconLink,
 
@@ -158,9 +302,31 @@ export function normalizeLiveItem(
 
     /*
       PROGRESSION
-      (FILLED LATER)
     */
+
     usedInTasks: [],
+
+    handoverTasks: [],
+
+    combatTasks: [],
+
+    keyTasks: [],
+
+    hideoutTasks: [],
+
+    craftTasks: [],
+
+    /*
+      HIDEOUT INTELLIGENCE
+    */
+
+    requiredForHideout,
+
+    hideoutRequirements,
+
+    hideoutModules,
+
+    totalHideoutRequired,
 
     usedInHideout: [],
 
@@ -169,6 +335,7 @@ export function normalizeLiveItem(
     /*
       SELL FOR
     */
+
     sellFor:
       item.sellFor?.map(
         (entry) => ({

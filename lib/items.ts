@@ -1,5 +1,13 @@
-import { items } from "@/data/items/items";
+import { getItems } from "@/lib/item-provider";
 
-export function getItemById(id: string) {
-  return items[id];
+export async function getItemById(
+  id: string
+) {
+  const items =
+    await getItems();
+
+  return items.find(
+    (item) =>
+      item.id === id
+  );
 }

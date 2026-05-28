@@ -1,4 +1,4 @@
-import { getLiveItems } from "@/lib/live-items";
+import { getLiveItems } from "@/lib/live-item-source";
 
 interface LiveItem {
   id: string;

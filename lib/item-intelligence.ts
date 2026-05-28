@@ -1,6 +1,18 @@
-import { getTasks } from "@/lib/task-provider";
+import {
+  getTasks,
+} from "@/lib/task-provider";
 
-import { TarkovTask } from "@/types/task";
+import {
+  getItems,
+} from "@/lib/item-provider";
+
+import {
+  TarkovTask,
+} from "@/types/task";
+
+import {
+  TarkovItem,
+} from "@/types/item";
 
 interface ItemUsage {
   task: TarkovTask;
@@ -24,21 +36,92 @@ export async function getTasksByItem(
       task.objectives || [];
 
     for (const objective of objectives) {
+      /*
+        DESCRIPTION
+      */
+
       const description =
         (
           objective.description ||
           ""
         ).toLowerCase();
 
-      if (
+      /*
+        IGNORE GENERIC
+        ECONOMY TASKS
+      */
+
+      const isGenericSellTask =
         description.includes(
-          itemName.toLowerCase()
-        )
+          "sell any"
+        ) ||
+        description.includes(
+          "hand over any"
+        ) ||
+        description.includes(
+          "turn in any"
+        );
+
+      if (
+        isGenericSellTask
+      ) {
+        continue;
+      }
+
+      /*
+        DIRECT ITEM
+
+        Transitional support
+        for legacy objective
+        shapes.
+      */
+
+      const directItemMatch =
+        (
+          objective as any
+        ).item?.name ===
+        itemName;
+
+      /*
+        MULTI ITEM
+      */
+
+      const multiItemMatch =
+  (
+    objective as any
+  ).items?.some(
+         (
+  objectiveItem: any
+) =>
+            objectiveItem.name ===
+            itemName
+        );
+
+      /*
+        ONLY USE
+        STRUCTURED ITEM
+        RELATIONSHIPS
+
+        NO DESCRIPTION
+        PARSING
+      */
+
+      if (
+        directItemMatch ||
+        multiItemMatch
       ) {
         matches.push({
           task,
 
-          amount: 1,
+          amount:
+  (
+    objective as any
+  ).count || 1,
+
+          foundInRaid:
+  (
+    objective as any
+  ).foundInRaid,
         });
 
         break;
@@ -66,17 +149,35 @@ export async function getItemPriority(
 
   let score = 0;
 
+  /*
+    BASE TASK VALUE
+  */
+
   score +=
     relatedTasks.length *
     2;
 
+  /*
+    KAPPA BONUS
+  */
+
   score +=
     kappaTasks.length * 3;
 
-  if (score >= 10)
+  /*
+    FIR BONUS
+  */
+
+  score +=
+    relatedTasks.filter(
+      (entry) =>
+        entry.foundInRaid
+    ).length * 2;
+
+  if (score >= 12)
     return "EXTREMELY HIGH";
 
-  if (score >= 6)
+  if (score >= 7)
     return "HIGH";
 
   if (score >= 3)
@@ -85,14 +186,15 @@ export async function getItemPriority(
   return "LOW";
 }
 
-import { items } from "@/data/items/items";
-
-export function getItemById(
+export async function getItemById(
   id: string
-) {
-  return Object.values(
-    items
-  ).find(
+): Promise<
+  TarkovItem | undefined
+> {
+  const items =
+    await getItems();
+
+  return items.find(
     (item) =>
       item.id === id
   );

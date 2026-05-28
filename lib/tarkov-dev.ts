@@ -17,9 +17,15 @@ export async function tarkovDevQuery(
         query,
       }),
 
-      next: {
-        revalidate: 3600,
-      },
+      /*
+        DISABLE NEXT CACHE
+
+        Full Tarkov item dataset
+        exceeds Next.js 2MB cache
+        limit.
+      */
+
+      cache: "no-store",
     });
 
   const json =
@@ -35,15 +41,6 @@ export async function tarkovDevQuery(
       json.errors
     );
   }
-
-  /*
-    DEBUG RESPONSE
-  */
-
-  console.log(
-    "TARKOV.DEV RESPONSE:",
-    json
-  );
 
   return json.data;
 }

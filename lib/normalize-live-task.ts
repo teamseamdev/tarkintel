@@ -23,7 +23,8 @@ export function normalizeLiveTask(
     );
 
   /*
-    RAW REQUIREMENTS
+    RAW TASK
+    PREREQUISITES
   */
 
   const rawPrerequisites =
@@ -37,14 +38,17 @@ export function normalizeLiveTask(
         ) =>
           requirement.__typename ===
             "TaskStatusRequirement" &&
-          requirement.task?.id
+          (
+            requirement as any
+          ).task?.id
       )
       .map(
         (
           requirement
         ) =>
-          requirement.task!
-            .id!
+          (
+            requirement as any
+          ).task.id
       );
 
   /*
@@ -57,6 +61,55 @@ export function normalizeLiveTask(
       (id) =>
         validTaskIds.has(id)
     );
+
+  /*
+    ITEM REQUIREMENTS
+    (HANDOVER TASKS)
+  */
+
+  const itemRequirements =
+    (
+      task.taskRequirements ||
+      []
+    )
+      .filter(
+        (
+          requirement
+        ) =>
+          requirement.__typename ===
+            "TaskHandoverRequirement" &&
+          (
+            requirement as any
+          ).item?.name
+      )
+      .map(
+        (
+          requirement
+        ) => ({
+          item: {
+            id:
+              (
+                requirement as any
+              ).item?.id,
+
+            name:
+              (
+                requirement as any
+              ).item?.name,
+          },
+
+          count:
+            (
+              requirement as any
+            ).count ?? 0,
+
+          foundInRaid:
+            (
+              requirement as any
+            ).foundInRaid ??
+            false,
+        })
+      );
 
   /*
     STARTER TASKS
@@ -100,9 +153,20 @@ export function normalizeLiveTask(
       task.experience ?? 0,
 
     objectives:
-      task.objectives || [],
+      (
+        task.objectives ||
+        []
+      ) as any,
 
     prerequisites,
+
+    /*
+      NORMALIZED
+      ITEM REQUIREMENTS
+    */
+
+    taskRequirements:
+      itemRequirements,
 
     maps: task.map?.name
       ? [task.map.name]

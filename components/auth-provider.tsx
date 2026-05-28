@@ -7,7 +7,10 @@ import {
   useState,
 } from "react";
 
-import { User } from "@supabase/supabase-js";
+import type {
+  Session,
+  User,
+} from "@supabase/supabase-js";
 
 import { supabase } from "@/lib/supabase";
 
@@ -27,6 +30,8 @@ interface AuthContextType {
 
   profile: UserProfile | null;
 
+  session: Session | null;
+
   loading: boolean;
 }
 
@@ -36,6 +41,8 @@ const AuthContext =
 
     profile: null,
 
+    session: null,
+
     loading: true,
   });
 
@@ -44,6 +51,10 @@ export function AuthProvider({
 }: {
   children: React.ReactNode;
 }) {
+  /*
+    STATE
+  */
+
   const [user, setUser] =
     useState<User | null>(null);
 
@@ -54,56 +65,134 @@ export function AuthProvider({
     null
   );
 
+  const [
+    session,
+    setSession,
+  ] =
+    useState<Session | null>(
+      null
+    );
+
   const [loading, setLoading] =
     useState(true);
+
+  /*
+    LOAD + HYDRATE
+  */
 
   useEffect(() => {
     let mounted = true;
 
-    async function loadUser() {
+    async function hydrateAuth() {
       try {
         setLoading(true);
 
+        /*
+          SESSION
+        */
+
         const {
-          data: { session },
+          data,
+          error,
         } =
           await supabase.auth.getSession();
+
+        if (error) {
+          console.error(
+            "GET SESSION ERROR:",
+            error
+          );
+        }
 
         if (!mounted) {
           return;
         }
 
+        const activeSession =
+          data.session || null;
+
         const authUser =
-          session?.user || null;
+          activeSession?.user ||
+          null;
+
+        /*
+          DEBUG
+        */
+
+        console.log(
+          "AUTH SESSION:",
+          activeSession
+        );
+
+        console.log(
+          "AUTH USER:",
+          authUser
+        );
+
+        /*
+          STATE
+        */
+
+        setSession(
+          activeSession
+        );
 
         setUser(authUser);
 
+        /*
+          PROFILE
+        */
+
         if (authUser) {
-          const createdProfile =
-            await ensureProfile(
-              authUser
+          try {
+            const ensuredProfile =
+              await ensureProfile(
+                authUser
+              );
+
+            if (!mounted) {
+              return;
+            }
+
+            console.log(
+              "PROFILE:",
+              ensuredProfile
             );
 
-          if (!mounted) {
-            return;
-          }
+            setProfile(
+              ensuredProfile
+            );
+          } catch (
+            profileError
+          ) {
+            console.error(
+              "PROFILE LOAD ERROR:",
+              profileError
+            );
 
-          setProfile(
-            createdProfile
-          );
+            if (
+              mounted
+            ) {
+              setProfile(
+                null
+              );
+            }
+          }
         } else {
           setProfile(null);
         }
       } catch (error) {
         console.error(
-          "AUTH LOAD ERROR:",
+          "AUTH HYDRATION ERROR:",
           error
         );
 
         if (mounted) {
-          setProfile(null);
+          setSession(null);
 
           setUser(null);
+
+          setProfile(null);
         }
       } finally {
         if (mounted) {
@@ -112,10 +201,10 @@ export function AuthProvider({
       }
     }
 
-    loadUser();
+    hydrateAuth();
 
     /*
-      LIVE AUTH CHANGES
+      LIVE AUTH EVENTS
     */
 
     const {
@@ -123,10 +212,20 @@ export function AuthProvider({
     } =
       supabase.auth.onAuthStateChange(
         async (
-          _event,
-          session
+          event,
+          nextSession
         ) => {
           try {
+            console.log(
+              "AUTH EVENT:",
+              event
+            );
+
+            console.log(
+              "NEXT SESSION:",
+              nextSession
+            );
+
             if (!mounted) {
               return;
             }
@@ -134,37 +233,58 @@ export function AuthProvider({
             setLoading(true);
 
             const authUser =
-              session?.user ||
+              nextSession?.user ||
               null;
+
+            /*
+              STATE
+            */
+
+            setSession(
+              nextSession
+            );
 
             setUser(authUser);
 
+            /*
+              PROFILE
+            */
+
             if (authUser) {
-              const createdProfile =
+              const ensuredProfile =
                 await ensureProfile(
                   authUser
                 );
 
-              if (!mounted) {
+              if (
+                !mounted
+              ) {
                 return;
               }
 
+              console.log(
+                "SYNCED PROFILE:",
+                ensuredProfile
+              );
+
               setProfile(
-                createdProfile
+                ensuredProfile
               );
             } else {
               setProfile(null);
             }
           } catch (error) {
             console.error(
-              "AUTH STATE ERROR:",
+              "AUTH STATE CHANGE ERROR:",
               error
             );
 
             if (mounted) {
-              setProfile(null);
+              setSession(null);
 
               setUser(null);
+
+              setProfile(null);
             }
           } finally {
             if (mounted) {
@@ -187,6 +307,8 @@ export function AuthProvider({
         user,
 
         profile,
+
+        session,
 
         loading,
       }}
