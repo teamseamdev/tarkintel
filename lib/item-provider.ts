@@ -25,11 +25,12 @@ import type {
   TarkovItem,
 } from "@/types/item";
 
+export const revalidate = 3600;
+
 export const getItems =
-  cache(
-    async (): Promise<
-      TarkovItem[]
-    > => {
+  cache(async (): Promise<
+    TarkovItem[]
+  > => {
       /*
         LIVE ITEMS
       */
