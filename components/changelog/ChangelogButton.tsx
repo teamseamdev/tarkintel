@@ -6,8 +6,8 @@ import {
 
 const changelog = [
   {
-    version: "0.9.0",
-    date: "Public Beta",
+    version: "0.1.0",
+    date: "6/9/26",
     changes: [
       "Massive performance improvements across Tasks, Items, and Hideout",
       "New hideout progression planner",
