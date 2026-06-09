@@ -19,8 +19,7 @@ export default function LoginButton() {
   async function login() {
     try {
       /*
-        IMPORTANT:
-        PRODUCTION URL
+        ENVIRONMENT
       */
 
       const isProduction =
@@ -36,9 +35,72 @@ export default function LoginButton() {
           ? "https://tarkintel.com"
           : "http://localhost:3000";
 
+      /*
+        DETECT IOS / PWA
+      */
+
+      const isStandalone =
+        window.matchMedia(
+          "(display-mode: standalone)"
+        ).matches ||
+        (
+          window.navigator as any
+        ).standalone === true;
+
+      /*
+        IMPORTANT:
+        FORCE EXTERNAL
+        BROWSER AUTH
+        FOR IOS PWA
+      */
+
+      if (isStandalone) {
+        const {
+          data,
+          error,
+        } =
+          await supabase.auth.signInWithOAuth(
+            {
+              provider:
+                "discord",
+
+              options: {
+                redirectTo,
+
+                scopes:
+                  "identify email guilds",
+
+                skipBrowserRedirect:
+                  true,
+              },
+            }
+          );
+
+        if (error) {
+          throw error;
+        }
+
+        /*
+          BREAK OUT OF
+          IOS PWA WEBVIEW
+        */
+
+        if (data?.url) {
+          window.location.href =
+            data.url;
+        }
+
+        return;
+      }
+
+      /*
+        NORMAL WEB LOGIN
+      */
+
       await supabase.auth.signInWithOAuth(
         {
-          provider: "discord",
+          provider:
+            "discord",
 
           options: {
             redirectTo,
@@ -69,7 +131,7 @@ export default function LoginButton() {
       });
 
       /*
-        CLEAR LOCAL
+        CLEAR LOCAL CACHE
       */
 
       localStorage.clear();
