@@ -17,11 +17,43 @@ export default function LoginButton() {
   */
 
   async function login() {
-    await supabase.auth.signInWithOAuth(
-      {
-        provider: "discord",
-      }
-    );
+    try {
+      /*
+        IMPORTANT:
+        PRODUCTION URL
+      */
+
+      const isProduction =
+        window.location.hostname !==
+        "localhost";
+
+      /*
+        REDIRECT TARGET
+      */
+
+      const redirectTo =
+        isProduction
+          ? "https://tarkintel.com"
+          : "http://localhost:3000";
+
+      await supabase.auth.signInWithOAuth(
+        {
+          provider: "discord",
+
+          options: {
+            redirectTo,
+
+            scopes:
+              "identify email guilds",
+          },
+        }
+      );
+    } catch (error) {
+      console.error(
+        "DISCORD LOGIN ERROR:",
+        error
+      );
+    }
   }
 
   /*
@@ -36,9 +68,17 @@ export default function LoginButton() {
         scope: "local",
       });
 
+      /*
+        CLEAR LOCAL
+      */
+
       localStorage.clear();
 
       sessionStorage.clear();
+
+      /*
+        HARD RESET
+      */
 
       window.location.href = "/";
     } catch (error) {
