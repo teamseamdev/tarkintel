@@ -38,11 +38,70 @@ export function ProfilePageClient({
   } = useTaskProgress();
 
   /*
+    SAFE TASKS
+  */
+
+  const safeCompletedTasks =
+    completedTasks || [];
+
+  /*
+    ANALYTICS
+    MUST ALWAYS RUN
+    BEFORE RETURNS
+  */
+
+  const kappaProgress =
+    useMemo(() => {
+      return getKappaProgress(
+        tasks,
+        safeCompletedTasks
+      );
+    }, [
+      tasks,
+      safeCompletedTasks,
+    ]);
+
+  const traderProgress =
+    useMemo(() => {
+      return getTraderProgress(
+        tasks,
+        safeCompletedTasks
+      );
+    }, [
+      tasks,
+      safeCompletedTasks,
+    ]);
+
+  const remainingKappaTasks =
+    useMemo(() => {
+      return getRemainingKappaTasks(
+        tasks,
+        safeCompletedTasks
+      );
+    }, [
+      tasks,
+      safeCompletedTasks,
+    ]);
+
+  /*
     LOADING
   */
 
   if (!loaded) {
-    return null;
+    return (
+      <div className="min-h-screen p-4 pb-28 text-white">
+        <div className="glass-card rounded-[2rem] p-6">
+          <h1 className="text-2xl font-black">
+            Loading Profile...
+          </h1>
+
+          <p className="mt-2 text-sm text-zinc-400">
+            Syncing TarkIntel
+            progression data.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   /*
@@ -76,43 +135,6 @@ export function ProfilePageClient({
       </div>
     );
   }
-
-  /*
-    ANALYTICS
-  */
-
-  const kappaProgress =
-    useMemo(() => {
-      return getKappaProgress(
-        tasks,
-        completedTasks
-      );
-    }, [
-      tasks,
-      completedTasks,
-    ]);
-
-  const traderProgress =
-    useMemo(() => {
-      return getTraderProgress(
-        tasks,
-        completedTasks
-      );
-    }, [
-      tasks,
-      completedTasks,
-    ]);
-
-  const remainingKappaTasks =
-    useMemo(() => {
-      return getRemainingKappaTasks(
-        tasks,
-        completedTasks
-      );
-    }, [
-      tasks,
-      completedTasks,
-    ]);
 
   return (
     <div className="min-h-screen p-4 pb-28 text-white">
@@ -171,7 +193,7 @@ export function ProfilePageClient({
 
                 <h2 className="mt-2 text-3xl font-black text-primary">
                   {
-                    completedTasks.length
+                    safeCompletedTasks.length
                   }
                 </h2>
               </div>
