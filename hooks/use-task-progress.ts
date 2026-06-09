@@ -47,134 +47,137 @@ export function useTaskProgress() {
   );
 
   /*
-    INITIALIZATION STATE
+    IMPORTANT:
+    LOCAL READY
+    IMMEDIATELY
   */
-
-  const [
-    initializing,
-    setInitializing,
-  ] = useState(true);
 
   const [loaded, setLoaded] =
     useState(false);
 
   /*
-    INITIAL LOAD
+    LOCAL HYDRATION
+    FIRST
+  */
+
+  useEffect(() => {
+    try {
+      /*
+        TASKS
+      */
+
+      const savedTasks =
+        localStorage.getItem(
+          STORAGE_KEY
+        );
+
+      if (savedTasks) {
+        setCompletedTasks(
+          JSON.parse(
+            savedTasks
+          )
+        );
+      }
+
+      /*
+        LEVEL
+      */
+
+      const savedLevel =
+        localStorage.getItem(
+          LEVEL_OVERRIDE_KEY
+        );
+
+      if (savedLevel) {
+        setPlayerLevelOverride(
+          JSON.parse(
+            savedLevel
+          )
+        );
+      }
+    } catch (error) {
+      console.error(
+        "LOCAL TASK HYDRATION ERROR:",
+        error
+      );
+    } finally {
+      /*
+        CRITICAL:
+        APP READY
+        IMMEDIATELY
+      */
+
+      setLoaded(true);
+    }
+  }, []);
+
+  /*
+    CLOUD SYNC
+    BACKGROUND ONLY
   */
 
   useEffect(() => {
     let cancelled = false;
 
-    async function loadProgress() {
-      try {
-        /*
-          LEVEL OVERRIDE
-          ALWAYS LOCAL
-        */
+    async function syncCloud() {
+      if (!profile?.id) {
+        return;
+      }
 
-        const savedLevel =
-          localStorage.getItem(
-            LEVEL_OVERRIDE_KEY
+      try {
+        const cloudProgress =
+          await loadTaskProgress(
+            profile.id
           );
 
         if (
-          savedLevel &&
-          !cancelled
+          cancelled
         ) {
-          setPlayerLevelOverride(
-            JSON.parse(
-              savedLevel
-            )
-          );
+          return;
         }
 
-        /*
-          AUTHENTICATED USER
-          CLOUD = SOURCE OF TRUTH
-        */
-
-        if (profile?.id) {
-          const cloudProgress =
-            await loadTaskProgress(
-              profile.id
+        const completed =
+          cloudProgress
+            .filter(
+              (
+                task: TaskProgressRecord
+              ) =>
+                task.completed
+            )
+            .map(
+              (
+                task: TaskProgressRecord
+              ) =>
+                task.task_id
             );
 
-          if (
-            cancelled
-          ) {
-            return;
-          }
+        /*
+          UPDATE UI
+        */
 
-          const completed =
-            cloudProgress
-              .filter(
-                (
-                  task: TaskProgressRecord
-                ) =>
-                  task.completed
-              )
-              .map(
-                (
-                  task: TaskProgressRecord
-                ) =>
-                  task.task_id
-              );
+        setCompletedTasks(
+          completed
+        );
 
-          setCompletedTasks(
+        /*
+          UPDATE CACHE
+        */
+
+        localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify(
             completed
-          );
-
-          /*
-            OPTIONAL CACHE
-          */
-
-          localStorage.setItem(
-            STORAGE_KEY,
-            JSON.stringify(
-              completed
-            )
-          );
-        }
-
-        /*
-          GUEST USER
-          LOCAL = SOURCE OF TRUTH
-        */
-
-        else {
-          const saved =
-            localStorage.getItem(
-              STORAGE_KEY
-            );
-
-          if (
-            saved &&
-            !cancelled
-          ) {
-            setCompletedTasks(
-              JSON.parse(saved)
-            );
-          }
-        }
+          )
+        );
       } catch (error) {
         console.error(
-          "LOAD PROGRESS ERROR:",
+          "TASK CLOUD SYNC ERROR:",
           error
         );
-      } finally {
-        if (
-          !cancelled
-        ) {
-          setInitializing(
-            false
-          );
-
-          setLoaded(true);
-        }
       }
     }
 
-    loadProgress();
+    syncCloud();
 
     return () => {
       cancelled = true;
@@ -183,13 +186,10 @@ export function useTaskProgress() {
 
   /*
     LOCAL SAVE
-    GUEST USERS ONLY
   */
 
   useEffect(() => {
-    if (!loaded) return;
-
-    if (profile?.id) {
+    if (!loaded) {
       return;
     }
 
@@ -202,7 +202,6 @@ export function useTaskProgress() {
   }, [
     completedTasks,
     loaded,
-    profile?.id,
   ]);
 
   /*
@@ -210,7 +209,9 @@ export function useTaskProgress() {
   */
 
   useEffect(() => {
-    if (!loaded) return;
+    if (!loaded) {
+      return;
+    }
 
     localStorage.setItem(
       LEVEL_OVERRIDE_KEY,
@@ -234,6 +235,10 @@ export function useTaskProgress() {
       !completedTasks.includes(
         taskId
       );
+
+    /*
+      INSTANT LOCAL
+    */
 
     setCompletedTasks(
       (prev) => {
@@ -284,8 +289,6 @@ export function useTaskProgress() {
     isTaskCompleted,
 
     loaded,
-
-    initializing,
 
     playerLevelOverride,
 
