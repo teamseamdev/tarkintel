@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 
-import { usePathname } from "next/navigation";
+import {
+  usePathname,
+  useRouter,
+} from "next/navigation";
+
+import {
+  useEffect,
+} from "react";
 
 import {
   navigationItems,
@@ -11,6 +18,22 @@ import {
 export function MobileNav() {
   const pathname =
     usePathname();
+
+  const router =
+    useRouter();
+
+  /*
+    PREFETCH
+    IMPORTANT ROUTES
+  */
+
+  useEffect(() => {
+    for (const item of navigationItems) {
+      router.prefetch(
+        item.href
+      );
+    }
+  }, [router]);
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur lg:hidden">
@@ -28,6 +51,7 @@ export function MobileNav() {
               <Link
                 key={item.href}
                 href={item.href}
+                prefetch={true}
                 className={`flex flex-col items-center gap-1 rounded-xl px-3 py-2 transition ${
                   isActive
                     ? "text-green-400"
