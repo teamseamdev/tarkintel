@@ -1,4 +1,7 @@
-import type { Metadata } from "next";
+import type {
+  Metadata,
+  Viewport,
+} from "next";
 
 import {
   Geist,
@@ -26,12 +29,67 @@ const geistMono =
     subsets: ["latin"],
   });
 
+/*
+  METADATA
+*/
+
 export const metadata: Metadata =
   {
     title: "TarkIntel",
 
     description:
       "Escape From Tarkov Progression Assistant",
+
+    manifest:
+      "/manifest.json",
+
+    appleWebApp: {
+      capable: true,
+
+      statusBarStyle:
+        "black-translucent",
+
+      title: "TarkIntel",
+    },
+
+    icons: {
+      icon: [
+        {
+          url: "/icons/icon-192.png",
+          sizes: "192x192",
+          type: "image/png",
+        },
+
+        {
+          url: "/icons/icon-512.png",
+          sizes: "512x512",
+          type: "image/png",
+        },
+      ],
+
+      apple:
+        "/icons/icon-512.png",
+    },
+  };
+
+/*
+  VIEWPORT
+*/
+
+export const viewport: Viewport =
+  {
+    themeColor:
+      "#05070A",
+
+    viewportFit:
+      "cover",
+
+    width:
+      "device-width",
+
+    initialScale: 1,
+
+    maximumScale: 1,
   };
 
 export default function RootLayout({
