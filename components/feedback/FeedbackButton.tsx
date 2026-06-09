@@ -142,16 +142,16 @@ export function FeedbackButton() {
 
   return (
     <>
-      {/* FLOATING ACTION BUTTON */}
-      <button
-        onClick={() =>
-          setOpen(true)
-        }
-        aria-label="Open Feedback"
-        className="fixed bottom-[105px] right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full border border-primary/30 bg-primary text-xl font-black text-black shadow-2xl transition hover:scale-[1.03] active:scale-[0.98]"
-      >
-        ✉
-      </button>
+      {/* FLOATING FEEDBACK BUTTON */}
+<button
+  onClick={() =>
+    setOpen(true)
+  }
+  aria-label="Open Feedback"
+  className="fixed bottom-[145px] right-4 z-50 rounded-full border border-primary/30 bg-primary px-5 py-3 text-sm font-bold text-black shadow-2xl transition hover:scale-[1.03] active:scale-[0.98]"
+>
+  Feedback
+</button>
 
       {/* MODAL */}
       {open && (
