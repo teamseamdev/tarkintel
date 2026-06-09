@@ -1,98 +1,53 @@
 import {
-  getHideoutModules,
-} from "@/lib/hideout-provider";
-
-import { getItems } from "@/lib/item-provider";
+  Suspense,
+} from "react";
 
 import {
   PageContainer,
 } from "@/components/layout/PageContainer";
 
 import {
-  HideoutPlannerClient,
-} from "@/components/hideout/HideoutPlannerClient";
+  HideoutLoader,
+} from "@/components/hideout/HideoutLoader";
 
-export default async function HideoutPage() {
-  /*
-    LIVE HIDEOUT
-  */
-
-  const hideoutModules =
-    await getHideoutModules();
-
-  /*
-    LIVE ITEMS
-  */
-
-  const items =
-    await getItems();
-
+function HideoutFallback() {
   return (
     <PageContainer>
-      {/* Header */}
-      <div className="relative overflow-hidden rounded-[2rem] glass-card p-6">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent" />
+      <div className="flex flex-col gap-6">
+        {/* Header Skeleton */}
+        <div className="h-[220px] animate-pulse rounded-[2rem] border border-white/5 bg-white/[0.03]" />
 
-        <div className="relative z-10">
-          <p className="text-sm uppercase tracking-[0.3em] text-zinc-500">
-            Tactical Infrastructure
-          </p>
+        {/* Stats Skeleton */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="h-[140px] animate-pulse rounded-3xl border border-white/5 bg-white/[0.03]" />
 
-          <h1 className="text-gradient mt-3 text-5xl font-black tracking-tight">
-            Hideout
-          </h1>
+          <div className="h-[140px] animate-pulse rounded-3xl border border-white/5 bg-white/[0.03]" />
+        </div>
 
-          <p className="mt-3 max-w-md text-sm text-zinc-400">
-            Live hideout
-            progression planning,
-            upgrade tracking,
-            and future material
-            forecasting.
-          </p>
+        {/* Planner Skeleton */}
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+          {Array.from({
+            length: 6,
+          }).map((_, index) => (
+            <div
+              key={index}
+              className="h-[420px] animate-pulse rounded-[2rem] border border-white/5 bg-white/[0.03]"
+            />
+          ))}
         </div>
       </div>
-
-      {/* Overview */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="glass-card rounded-3xl p-5">
-          <p className="text-sm text-zinc-500">
-            Modules
-          </p>
-
-          <h2 className="mt-3 text-4xl font-black text-primary">
-            {
-              hideoutModules.length
-            }
-          </h2>
-        </div>
-
-        <div className="glass-card rounded-3xl p-5">
-          <p className="text-sm text-zinc-500">
-            Upgrade Levels
-          </p>
-
-          <h2 className="mt-3 text-4xl font-black text-blue-400">
-            {hideoutModules.reduce(
-              (
-                total,
-                module
-              ) =>
-                total +
-                module.levels
-                  .length,
-              0
-            )}
-          </h2>
-        </div>
-      </div>
-
-      {/* Planner */}
-      <HideoutPlannerClient
-        modules={
-          hideoutModules
-        }
-        items={items}
-      />
     </PageContainer>
+  );
+}
+
+export default function HideoutPage() {
+  return (
+    <Suspense
+      fallback={
+        <HideoutFallback />
+      }
+    >
+      <HideoutLoader />
+    </Suspense>
   );
 }

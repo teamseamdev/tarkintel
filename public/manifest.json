@@ -1,12 +1,11 @@
 {
   "name": "TarkIntel",
   "short_name": "TarkIntel",
-  "description": "Escape From Tarkov progression intelligence platform",
+  "description": "Escape From Tarkov Progression Intelligence",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#05070A",
   "theme_color": "#05070A",
-  "orientation": "portrait",
   "icons": [
     {
       "src": "/icons/icon-192.png",

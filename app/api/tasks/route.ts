@@ -5,14 +5,59 @@ import { getTasks } from "@/lib/task-provider";
 export async function GET() {
   try {
     /*
-      ALREADY NORMALIZED
+      FETCH TASKS
     */
 
     const tasks =
-      await getTasks();
+      await Promise.race([
+        getTasks(),
+
+        /*
+          TIMEOUT
+        */
+
+        new Promise(
+          (
+            _,
+            reject
+          ) =>
+            setTimeout(() => {
+              reject(
+                new Error(
+                  "Tasks API timeout"
+                )
+              );
+            }, 10000)
+        ),
+      ]);
+
+    /*
+      VALIDATION
+    */
+
+    if (
+      !Array.isArray(tasks)
+    ) {
+      throw new Error(
+        "Invalid tasks response"
+      );
+    }
+
+    /*
+      SUCCESS
+    */
 
     return NextResponse.json(
-      tasks
+      tasks,
+
+      {
+        status: 200,
+
+        headers: {
+          "Cache-Control":
+            "public, s-maxage=300, stale-while-revalidate=600",
+        },
+      }
     );
   } catch (error) {
     console.error(
@@ -20,10 +65,18 @@ export async function GET() {
       error
     );
 
+    /*
+      SAFE RESPONSE
+    */
+
     return NextResponse.json(
       {
+        success: false,
+
         error:
-          "Failed to load tasks",
+          "Failed to load tasks.",
+
+        fallback: [],
       },
 
       {
