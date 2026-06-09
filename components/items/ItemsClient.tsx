@@ -44,10 +44,12 @@ export function ItemsClient({
           );
       }
 
-      return filtered.slice(
-        0,
-        50
-      );
+    return filtered.slice(
+  0,
+  search.trim()
+    ? 100
+    : 35
+);
     }, [search, items]);
 
   return (
