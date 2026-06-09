@@ -333,18 +333,87 @@ export function useHideoutProgress() {
 
     let remaining = 0;
 
+    /*
+      DEFENSIVE GUARDS
+      FOR LIVE DATA
+    */
+
+    if (
+      !Array.isArray(
+        modules
+      )
+    ) {
+      return {
+        used,
+        reserved,
+        remaining,
+      };
+    }
+
     for (const module of modules) {
+      /*
+        INVALID MODULE
+      */
+
+      if (
+        !module ||
+        typeof module !==
+          "object"
+      ) {
+        continue;
+      }
+
       const completedLevel =
         getCompletedLevel(
           module.id
         );
 
-      for (const level of module.levels) {
+      /*
+        CRITICAL FIX
+        Some live data may not
+        contain levels array
+      */
+
+      const levels =
+        Array.isArray(
+          module.levels
+        )
+          ? module.levels
+          : [];
+
+      for (const level of levels) {
+        /*
+          INVALID LEVEL
+        */
+
+        if (
+          !level ||
+          typeof level !==
+            "object"
+        ) {
+          continue;
+        }
+
         const requirements =
-          level.requirements ||
-          [];
+          Array.isArray(
+            level.requirements
+          )
+            ? level.requirements
+            : [];
 
         for (const requirement of requirements) {
+          /*
+            INVALID REQUIREMENT
+          */
+
+          if (
+            !requirement ||
+            typeof requirement !==
+              "object"
+          ) {
+            continue;
+          }
+
           if (
             requirement.itemId !==
             itemId
@@ -352,15 +421,20 @@ export function useHideoutProgress() {
             continue;
           }
 
+          const count =
+            typeof requirement.count ===
+            "number"
+              ? requirement.count
+              : 0;
+
           if (
             level.level <=
             completedLevel
           ) {
-            used +=
-              requirement.count;
+            used += count;
           } else {
             remaining +=
-              requirement.count;
+              count;
           }
 
           if (
@@ -369,7 +443,7 @@ export function useHideoutProgress() {
               1
           ) {
             reserved +=
-              requirement.count;
+              count;
           }
         }
       }
