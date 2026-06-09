@@ -18,6 +18,9 @@ export function FeedbackButton() {
   const [category, setCategory] =
     useState("Bug");
 
+  const [email, setEmail] =
+    useState("");
+
   const [message, setMessage] =
     useState("");
 
@@ -70,7 +73,7 @@ export function FeedbackButton() {
           profile?.id || null,
 
         email:
-          null,
+          email.trim() || null,
 
         category,
 
@@ -111,6 +114,8 @@ export function FeedbackButton() {
 
       setMessage("");
 
+      setEmail("");
+
       /*
         AUTO CLOSE
       */
@@ -143,15 +148,15 @@ export function FeedbackButton() {
   return (
     <>
       {/* FLOATING FEEDBACK BUTTON */}
-<button
-  onClick={() =>
-    setOpen(true)
-  }
-  aria-label="Open Feedback"
-  className="fixed bottom-[125px] right-4 z-50 rounded-full border border-primary/30 bg-primary px-5 py-3 text-sm font-bold text-black shadow-2xl transition hover:scale-[1.03] active:scale-[0.98]"
->
-  Feedback
-</button>
+      <button
+        onClick={() =>
+          setOpen(true)
+        }
+        aria-label="Open Feedback"
+        className="fixed bottom-[125px] right-4 z-50 rounded-full border border-primary/30 bg-primary px-5 py-3 text-sm font-bold text-black shadow-2xl transition hover:scale-[1.03] active:scale-[0.98]"
+      >
+        Feedback
+      </button>
 
       {/* MODAL */}
       {open && (
@@ -219,6 +224,26 @@ export function FeedbackButton() {
                   Other
                 </option>
               </select>
+            </div>
+
+            {/* EMAIL */}
+            <div className="mt-5">
+              <label className="mb-2 block text-sm font-semibold text-zinc-300">
+                Contact Email
+                (Optional)
+              </label>
+
+              <input
+                type="email"
+                value={email}
+                onChange={(e) =>
+                  setEmail(
+                    e.target.value
+                  )
+                }
+                placeholder="you@example.com"
+                className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none transition focus:border-primary"
+              />
             </div>
 
             {/* MESSAGE */}
