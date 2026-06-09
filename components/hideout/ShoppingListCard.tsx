@@ -3,6 +3,10 @@
 import Link from "next/link";
 
 import {
+  useMemo,
+} from "react";
+
+import {
   createItemSlug,
 } from "@/lib/item-slug";
 
@@ -28,18 +32,84 @@ export function ShoppingListCard({
   items,
 }: ShoppingListCardProps) {
   const {
-    favorites,
     toggleFavorite,
     isFavorite,
   } =
     useFavoriteItems();
 
   /*
-    NOTHING NEEDED
+    SORTED ITEMS
+  */
+
+  const sortedItems =
+    useMemo(() => {
+      return [...items].sort(
+        (a, b) => {
+          const aFav =
+            isFavorite(
+              a.itemId
+            );
+
+          const bFav =
+            isFavorite(
+              b.itemId
+            );
+
+          /*
+            FAVORITES FIRST
+          */
+
+          if (
+            aFav &&
+            !bFav
+          ) {
+            return -1;
+          }
+
+          if (
+            !aFav &&
+            bFav
+          ) {
+            return 1;
+          }
+
+          /*
+            THEN DEMAND
+          */
+
+          return (
+            b.count -
+            a.count
+          );
+        }
+      );
+    }, [
+      items,
+      isFavorite,
+    ]);
+
+  /*
+    EMPTY STATE
   */
 
   if (items.length === 0) {
-    return null;
+    return (
+      <div className="glass-card rounded-[2rem] border border-emerald-500/20 bg-emerald-500/5 p-8 text-center">
+        <div className="text-6xl opacity-50">
+          ✅
+        </div>
+
+        <h2 className="mt-6 text-3xl font-black text-white">
+          Shopping Complete
+        </h2>
+
+        <p className="mx-auto mt-3 max-w-md text-sm text-zinc-400">
+          You currently have no
+          remaining hideout items
+          required for progression.
+        </p>
+      </div>
+    );
   }
 
   return (
@@ -61,57 +131,16 @@ export function ShoppingListCard({
       </div>
 
       <div className="mt-5 flex max-h-[500px] flex-col gap-3 overflow-y-auto pr-2">
-        {[...items]
-          .sort((a, b) => {
-            const aFav =
-              isFavorite(
-                a.itemId
-              );
-
-            const bFav =
-              isFavorite(
-                b.itemId
-              );
-
-            /*
-              FAVORITES
-              FIRST
-            */
-
-            if (
-              aFav &&
-              !bFav
-            ) {
-              return -1;
-            }
-
-            if (
-              !aFav &&
-              bFav
-            ) {
-              return 1;
-            }
-
-            /*
-              THEN
-              SORT BY
-              DEMAND
-            */
-
-            return (
-              b.count -
-              a.count
-            );
-          })
-          .map((item) => (
+        {sortedItems.map(
+          (item) => (
             <Link
               key={item.itemId}
               href={`/items/${createItemSlug(item.itemName)}`}
               className="block"
             >
               <div className="flex items-center justify-between rounded-2xl border border-white/5 bg-black/20 p-4 transition hover:border-primary/30 hover:bg-primary/5">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03]">
+                <div className="flex min-w-0 items-center gap-3">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03]">
                     {item.icon ? (
                       <img
                         src={
@@ -129,8 +158,8 @@ export function ShoppingListCard({
                     )}
                   </div>
 
-                  <div>
-                    <h3 className="font-semibold text-white">
+                  <div className="min-w-0">
+                    <h3 className="truncate font-semibold text-white">
                       {
                         item.itemName
                       }
@@ -143,7 +172,7 @@ export function ShoppingListCard({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex shrink-0 items-center gap-3">
                   <button
                     onClick={(
                       event
@@ -171,7 +200,8 @@ export function ShoppingListCard({
                 </div>
               </div>
             </Link>
-          ))}
+          )
+        )}
       </div>
     </div>
   );

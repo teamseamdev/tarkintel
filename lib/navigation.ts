@@ -36,4 +36,4 @@ export const navigationItems = [
     href: "/profile",
     icon: User,
   },
-];
+] as const;

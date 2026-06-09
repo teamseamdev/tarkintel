@@ -126,6 +126,22 @@ export function HideoutPlannerClient({
     }, [modules]);
 
   /*
+    ITEM MAP
+    MASSIVE PERFORMANCE
+    OPTIMIZATION
+  */
+
+  const itemMap =
+    useMemo(() => {
+      return new Map(
+        items.map((item) => [
+          item.id,
+          item,
+        ])
+      );
+    }, [items]);
+
+  /*
     SHOPPING LIST
   */
 
@@ -196,6 +212,7 @@ export function HideoutPlannerClient({
         </button>
       </div>
 
+      {/* Modules */}
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         {sortedModules.map(
           (
@@ -208,6 +225,9 @@ export function HideoutPlannerClient({
               }
               items={
                 items
+              }
+              itemMap={
+                itemMap
               }
               collapsed={
                 collapsedModules[

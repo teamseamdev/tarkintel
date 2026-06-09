@@ -147,115 +147,139 @@ export function ItemsClient({
           </div>
 
           <div className="flex max-h-[70vh] flex-col gap-4 overflow-y-auto pr-2">
-            {suggestions.map(
-              (item) => (
-                <Link
-                  key={item.id}
-                  href={`/items/${createItemSlug(
-                    item.name
-                  )}`}
-                >
-                  <div className="glass-card glass-hover rounded-[2rem] p-5 transition-all duration-300">
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex min-w-0 items-center gap-4">
-                        {/* Icon */}
-                        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03]">
-                          {item.icon ? (
-                            <img
-                              src={
-                                item.icon
-                              }
-                              alt={
-                                item.name
-                              }
-                              className="h-12 w-12 object-contain"
-                            />
-                          ) : (
-                            <div className="text-2xl text-zinc-600">
-                              ⬢
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Info */}
-                        <div className="min-w-0">
-                          <h2 className="truncate text-lg font-bold text-white">
-                            {item.name}
-                          </h2>
-
-                          <p className="mt-1 text-sm text-zinc-500">
-                            {
-                              item.category
-                            }
-                          </p>
-
-                          <div className="mt-3 flex flex-wrap gap-2">
-  {/* Quest / Handover */}
-  {item.handoverTasks
-    ?.length > 0 && (
-    <div className="rounded-full bg-primary/15 px-3 py-1 text-xs font-medium text-primary">
-      QUEST ITEM
+           {suggestions.length === 0 ? (
+  <div className="flex flex-col items-center justify-center rounded-[2rem] border border-white/5 bg-white/[0.02] px-6 py-16 text-center">
+    <div className="text-6xl opacity-40">
+      🔍
     </div>
-  )}
 
-  {/* Combat */}
-  {item.combatTasks
-    ?.length > 0 && (
-    <div className="rounded-full bg-blue-500/15 px-3 py-1 text-xs font-medium text-blue-400">
-      COMBAT
-    </div>
-  )}
+    <h3 className="mt-6 text-2xl font-black text-white">
+      No Items Found
+    </h3>
 
-  {/* Keys */}
-  {item.keyTasks
-    ?.length > 0 && (
-    <div className="rounded-full bg-yellow-500/15 px-3 py-1 text-xs font-medium text-yellow-400">
-      KEY ITEM
-    </div>
-  )}
+    <p className="mt-3 max-w-md text-sm text-zinc-500">
+      Try a different search term
+      to find Tarkov items,
+      barter goods, or quest
+      materials.
+    </p>
 
-  {/* Hideout */}
-  {item.hideoutTasks
-    ?.length > 0 && (
-    <div className="rounded-full bg-orange-500/15 px-3 py-1 text-xs font-medium text-orange-400">
-      HIDEOUT
-    </div>
-  )}
-
-  {/* Crafting */}
-  {item.craftTasks
-    ?.length > 0 && (
-    <div className="rounded-full bg-cyan-500/15 px-3 py-1 text-xs font-medium text-cyan-400">
-      CRAFT
-    </div>
-  )}
-
-  {/* Flea */}
-  {item.fleaBanned && (
-    <div className="rounded-full bg-red-500/15 px-3 py-1 text-xs font-medium text-red-400">
-      FLEA BANNED
-    </div>
-  )}
-</div>
-                        </div>
-                      </div>
-
-                      {/* Price */}
-                      <div className="shrink-0 text-right">
-                        <p className="text-xs uppercase tracking-wide text-zinc-500">
-                          Avg Price
-                        </p>
-
-                        <h3 className="mt-2 text-xl font-black text-primary">
-                          ₽
-                          {item.avgPrice?.toLocaleString()}
-                        </h3>
-                      </div>
-                    </div>
+    {search && (
+      <button
+        onClick={() =>
+          setSearch("")
+        }
+        className="mt-6 rounded-2xl border border-primary/20 bg-primary/10 px-5 py-3 text-sm font-semibold text-primary transition hover:scale-[1.02]"
+      >
+        Clear Search
+      </button>
+    )}
+  </div>
+) : (
+  suggestions.map(
+    (item) => (
+      <Link
+        key={item.id}
+        href={`/items/${createItemSlug(
+          item.name
+        )}`}
+      >
+        <div className="glass-card glass-hover rounded-[2rem] p-5 transition-all duration-300">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex min-w-0 items-center gap-4">
+              {/* Icon */}
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03]">
+                {item.icon ? (
+                  <img
+                    src={
+                      item.icon
+                    }
+                    alt={
+                      item.name
+                    }
+                    className="h-12 w-12 object-contain"
+                  />
+                ) : (
+                  <div className="text-2xl text-zinc-600">
+                    ⬢
                   </div>
-                </Link>
-              )
-            )}
+                )}
+              </div>
+
+              {/* Info */}
+              <div className="min-w-0">
+                <h2 className="truncate text-lg font-bold text-white">
+                  {item.name}
+                </h2>
+
+                <p className="mt-1 text-sm text-zinc-500">
+                  {
+                    item.category
+                  }
+                </p>
+
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {item.handoverTasks
+                    ?.length > 0 && (
+                    <div className="rounded-full bg-primary/15 px-3 py-1 text-xs font-medium text-primary">
+                      QUEST ITEM
+                    </div>
+                  )}
+
+                  {item.combatTasks
+                    ?.length > 0 && (
+                    <div className="rounded-full bg-blue-500/15 px-3 py-1 text-xs font-medium text-blue-400">
+                      COMBAT
+                    </div>
+                  )}
+
+                  {item.keyTasks
+                    ?.length > 0 && (
+                    <div className="rounded-full bg-yellow-500/15 px-3 py-1 text-xs font-medium text-yellow-400">
+                      KEY ITEM
+                    </div>
+                  )}
+
+                  {item.hideoutTasks
+                    ?.length > 0 && (
+                    <div className="rounded-full bg-orange-500/15 px-3 py-1 text-xs font-medium text-orange-400">
+                      HIDEOUT
+                    </div>
+                  )}
+
+                  {item.craftTasks
+                    ?.length > 0 && (
+                    <div className="rounded-full bg-cyan-500/15 px-3 py-1 text-xs font-medium text-cyan-400">
+                      CRAFT
+                    </div>
+                  )}
+
+                  {item.fleaBanned && (
+                    <div className="rounded-full bg-red-500/15 px-3 py-1 text-xs font-medium text-red-400">
+                      FLEA BANNED
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Price */}
+            <div className="shrink-0 text-right">
+              <p className="text-xs uppercase tracking-wide text-zinc-500">
+                Avg Price
+              </p>
+
+              <h3 className="mt-2 text-xl font-black text-primary">
+                ₽
+                {item.avgPrice?.toLocaleString()}
+              </h3>
+            </div>
+          </div>
+        </div>
+      </Link>
+    )
+  )
+)}
           </div>
         </div>
       </div>

@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  useMemo,
+} from "react";
+
 import { useAuth } from "@/components/auth-provider";
 
 import LoginButton from "@/components/login-button";
@@ -26,7 +30,6 @@ export function ProfilePageClient({
   const {
     user,
     profile,
-    loading: authLoading,
   } = useAuth();
 
   const {
@@ -38,24 +41,8 @@ export function ProfilePageClient({
     LOADING
   */
 
-  if (
-    authLoading ||
-    !loaded
-  ) {
-    return (
-      <div className="min-h-screen p-4 text-white">
-        <div className="glass-card rounded-3xl p-6">
-          <h1 className="text-2xl font-bold">
-            Syncing Profile...
-          </h1>
-
-          <p className="mt-2 text-zinc-400">
-            Loading progression
-            data.
-          </p>
-        </div>
-      </div>
-    );
+  if (!loaded) {
+    return null;
   }
 
   /*
@@ -64,18 +51,27 @@ export function ProfilePageClient({
 
   if (!user || !profile) {
     return (
-      <div className="min-h-screen p-4 text-white">
-        <div className="glass-card rounded-[2rem] p-6">
-          <h1 className="text-3xl font-black">
-            Not Logged In
+      <div className="min-h-screen p-4 pb-28 text-white">
+        <div className="glass-card rounded-[2rem] p-8 text-center">
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-primary/20 bg-primary/10 text-4xl">
+            🔒
+          </div>
+
+          <h1 className="mt-6 text-4xl font-black">
+            Login Required
           </h1>
 
-          <p className="mt-3 text-zinc-400">
-            Login with Discord to
-            access your TarkIntel
-            profile and cloud
-            progression.
+          <p className="mx-auto mt-4 max-w-md text-sm text-zinc-400">
+            Connect your Discord account
+            to sync progression,
+            track hideout upgrades,
+            and access your TarkIntel
+            profile across devices.
           </p>
+
+          <div className="mt-8 flex justify-center">
+            <LoginButton />
+          </div>
         </div>
       </div>
     );
@@ -86,22 +82,37 @@ export function ProfilePageClient({
   */
 
   const kappaProgress =
-    getKappaProgress(
+    useMemo(() => {
+      return getKappaProgress(
+        tasks,
+        completedTasks
+      );
+    }, [
       tasks,
-      completedTasks
-    );
+      completedTasks,
+    ]);
 
   const traderProgress =
-    getTraderProgress(
+    useMemo(() => {
+      return getTraderProgress(
+        tasks,
+        completedTasks
+      );
+    }, [
       tasks,
-      completedTasks
-    );
+      completedTasks,
+    ]);
 
   const remainingKappaTasks =
-    getRemainingKappaTasks(
+    useMemo(() => {
+      return getRemainingKappaTasks(
+        tasks,
+        completedTasks
+      );
+    }, [
       tasks,
-      completedTasks
-    );
+      completedTasks,
+    ]);
 
   return (
     <div className="min-h-screen p-4 pb-28 text-white">

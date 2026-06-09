@@ -500,35 +500,64 @@ const {
   </div>
 
   <div className="flex max-h-[70vh] flex-col gap-5 overflow-y-auto pr-2">
-    {sortedTasks.map(
-      (task: TarkovTask) => {
-        const completed =
-          isTaskCompleted(
-            task.id
-          );
+    {sortedTasks.length === 0 ? (
+  <div className="flex flex-col items-center justify-center rounded-[2rem] border border-white/5 bg-white/[0.02] px-6 py-16 text-center">
+    <div className="text-6xl opacity-40">
+      📋
+    </div>
 
-        const locked =
-          !!task
-            .missingRequirements
-            ?.length;
+    <h3 className="mt-6 text-2xl font-black text-white">
+      No Tasks Found
+    </h3>
 
-        return (
-          <TaskCard
-            key={task.id}
-            task={task}
-            completed={
-              completed
-            }
-            locked={locked}
-            onToggleComplete={() =>
-              toggleTask(
-                task.id
-              )
-            }
-          />
-        );
-      }
+    <p className="mt-3 max-w-md text-sm text-zinc-500">
+      Try adjusting your
+      filters or search query
+      to find matching tasks.
+    </p>
+
+    {searchQuery && (
+      <button
+        onClick={() =>
+          setSearchQuery("")
+        }
+        className="mt-6 rounded-2xl border border-primary/20 bg-primary/10 px-5 py-3 text-sm font-semibold text-primary transition hover:scale-[1.02]"
+      >
+        Clear Search
+      </button>
     )}
+  </div>
+) : (
+  sortedTasks.map(
+    (task: TarkovTask) => {
+      const completed =
+        isTaskCompleted(
+          task.id
+        );
+
+      const locked =
+        !!task
+          .missingRequirements
+          ?.length;
+
+      return (
+        <TaskCard
+          key={task.id}
+          task={task}
+          completed={
+            completed
+          }
+          locked={locked}
+          onToggleComplete={() =>
+            toggleTask(
+              task.id
+            )
+          }
+        />
+      );
+    }
+  )
+)}
   </div>
 </div>
     
