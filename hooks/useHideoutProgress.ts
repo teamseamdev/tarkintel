@@ -45,11 +45,16 @@ export function useHideoutProgress() {
     {}
   );
 
+  /*
+    LOCAL READY
+    IMMEDIATELY
+  */
+
   const [loaded, setLoaded] =
     useState(false);
 
   /*
-    DEBOUNCED SYNC
+    DEBOUNCED CLOUD
   */
 
   const debouncedSync =
@@ -80,88 +85,101 @@ export function useHideoutProgress() {
     }, [profile?.id]);
 
   /*
-    INITIAL LOAD
+    LOCAL HYDRATION
+    FIRST
+  */
+
+  useEffect(() => {
+    try {
+      const saved =
+        localStorage.getItem(
+          STORAGE_KEY
+        );
+
+      if (saved) {
+        setCompletedLevels(
+          JSON.parse(saved)
+        );
+      }
+    } catch (error) {
+      console.error(
+        "LOCAL HIDEOUT HYDRATION ERROR:",
+        error
+      );
+    } finally {
+      /*
+        APP READY
+        IMMEDIATELY
+      */
+
+      setLoaded(true);
+    }
+  }, []);
+
+  /*
+    CLOUD SYNC
+    BACKGROUND ONLY
   */
 
   useEffect(() => {
     let cancelled = false;
 
-    async function loadProgress() {
+    async function syncCloud() {
+      if (!profile?.id) {
+        return;
+      }
+
       try {
-        /*
-          AUTH USER
-        */
-
-        if (profile?.id) {
-          const cloudProgress =
-            await loadHideoutProgress(
-              profile.id
-            );
-
-          if (
-            cancelled
-          ) {
-            return;
-          }
-
-          const mapped =
-            Object.fromEntries(
-              cloudProgress.map(
-                (
-                  entry: HideoutProgressRecord
-                ) => [
-                  entry.module_id,
-                  entry.completed_level,
-                ]
-              )
-            );
-
-          setCompletedLevels(
-            mapped
+        const cloudProgress =
+          await loadHideoutProgress(
+            profile.id
           );
 
-          localStorage.setItem(
-            STORAGE_KEY,
-            JSON.stringify(
-              mapped
+        if (
+          cancelled
+        ) {
+          return;
+        }
+
+        const mapped =
+          Object.fromEntries(
+            cloudProgress.map(
+              (
+                entry: HideoutProgressRecord
+              ) => [
+                entry.module_id,
+                entry.completed_level,
+              ]
             )
           );
-        }
 
         /*
-          GUEST USER
+          UPDATE UI
         */
 
-        else {
-          const saved =
-            localStorage.getItem(
-              STORAGE_KEY
-            );
+        setCompletedLevels(
+          mapped
+        );
 
-          if (
-            saved &&
-            !cancelled
-          ) {
-            setCompletedLevels(
-              JSON.parse(saved)
-            );
-          }
-        }
+        /*
+          UPDATE CACHE
+        */
+
+        localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify(
+            mapped
+          )
+        );
       } catch (error) {
         console.error(
-          "HIDEOUT PROGRESS LOAD ERROR:",
+          "HIDEOUT CLOUD SYNC ERROR:",
           error
         );
-      } finally {
-        if (
-          !cancelled
-        ) {
-          setLoaded(true);
-        }
       }
     }
 
-    loadProgress();
+    syncCloud();
 
     return () => {
       cancelled = true;
@@ -170,15 +188,10 @@ export function useHideoutProgress() {
 
   /*
     LOCAL SAVE
-    GUEST ONLY
   */
 
   useEffect(() => {
     if (!loaded) {
-      return;
-    }
-
-    if (profile?.id) {
       return;
     }
 
@@ -191,7 +204,6 @@ export function useHideoutProgress() {
   }, [
     completedLevels,
     loaded,
-    profile?.id,
   ]);
 
   /*
@@ -236,16 +248,12 @@ export function useHideoutProgress() {
     );
 
     /*
-      GUEST
+      CLOUD
     */
 
     if (!profile?.id) {
       return;
     }
-
-    /*
-      DEBOUNCED CLOUD
-    */
 
     debouncedSync({
       moduleId,
@@ -367,8 +375,6 @@ export function useHideoutProgress() {
       }
     }
 
-    
-
     return {
       used,
 
@@ -398,4 +404,3 @@ export function useHideoutProgress() {
     loaded,
   };
 }
-

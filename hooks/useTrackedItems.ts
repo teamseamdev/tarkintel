@@ -41,11 +41,16 @@ export function useTrackedItems() {
     Record<string, number>
   >({});
 
+  /*
+    LOCAL READY
+    IMMEDIATELY
+  */
+
   const [loaded, setLoaded] =
     useState(false);
 
   /*
-    DEBOUNCED SYNC
+    DEBOUNCED CLOUD
   */
 
   const debouncedSync =
@@ -76,88 +81,101 @@ export function useTrackedItems() {
     }, [profile?.id]);
 
   /*
-    INITIAL LOAD
+    LOCAL HYDRATION
+    FIRST
+  */
+
+  useEffect(() => {
+    try {
+      const saved =
+        localStorage.getItem(
+          STORAGE_KEY
+        );
+
+      if (saved) {
+        setTrackedItems(
+          JSON.parse(saved)
+        );
+      }
+    } catch (error) {
+      console.error(
+        "LOCAL TRACKED ITEMS ERROR:",
+        error
+      );
+    } finally {
+      /*
+        APP READY
+        IMMEDIATELY
+      */
+
+      setLoaded(true);
+    }
+  }, []);
+
+  /*
+    CLOUD SYNC
+    BACKGROUND ONLY
   */
 
   useEffect(() => {
     let cancelled = false;
 
-    async function loadItems() {
+    async function syncCloud() {
+      if (!profile?.id) {
+        return;
+      }
+
       try {
-        /*
-          AUTH USER
-        */
-
-        if (profile?.id) {
-          const cloudItems =
-            await loadTrackedItems(
-              profile.id
-            );
-
-          if (
-            cancelled
-          ) {
-            return;
-          }
-
-          const mapped =
-            Object.fromEntries(
-              cloudItems.map(
-                (
-                  item: TrackedItemRecord
-                ) => [
-                  item.item_id,
-                  item.quantity,
-                ]
-              )
-            );
-
-          setTrackedItems(
-            mapped
+        const cloudItems =
+          await loadTrackedItems(
+            profile.id
           );
 
-          localStorage.setItem(
-            STORAGE_KEY,
-            JSON.stringify(
-              mapped
+        if (
+          cancelled
+        ) {
+          return;
+        }
+
+        const mapped =
+          Object.fromEntries(
+            cloudItems.map(
+              (
+                item: TrackedItemRecord
+              ) => [
+                item.item_id,
+                item.quantity,
+              ]
             )
           );
-        }
 
         /*
-          GUEST USER
+          UPDATE UI
         */
 
-        else {
-          const saved =
-            localStorage.getItem(
-              STORAGE_KEY
-            );
+        setTrackedItems(
+          mapped
+        );
 
-          if (
-            saved &&
-            !cancelled
-          ) {
-            setTrackedItems(
-              JSON.parse(saved)
-            );
-          }
-        }
+        /*
+          UPDATE CACHE
+        */
+
+        localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify(
+            mapped
+          )
+        );
       } catch (error) {
         console.error(
-          "TRACKED ITEM LOAD ERROR:",
+          "TRACKED ITEM CLOUD SYNC ERROR:",
           error
         );
-      } finally {
-        if (
-          !cancelled
-        ) {
-          setLoaded(true);
-        }
       }
     }
 
-    loadItems();
+    syncCloud();
 
     return () => {
       cancelled = true;
@@ -166,15 +184,10 @@ export function useTrackedItems() {
 
   /*
     LOCAL SAVE
-    GUEST ONLY
   */
 
   useEffect(() => {
     if (!loaded) {
-      return;
-    }
-
-    if (profile?.id) {
       return;
     }
 
@@ -187,7 +200,6 @@ export function useTrackedItems() {
   }, [
     trackedItems,
     loaded,
-    profile?.id,
   ]);
 
   /*
@@ -232,16 +244,12 @@ export function useTrackedItems() {
     );
 
     /*
-      GUEST SAVE
+      CLOUD
     */
 
     if (!profile?.id) {
       return;
     }
-
-    /*
-      DEBOUNCED CLOUD
-    */
 
     debouncedSync({
       itemId,
@@ -286,7 +294,6 @@ export function useTrackedItems() {
 
   /*
     INVENTORY
-    ALLOCATION
   */
 
   function getItemAllocation(
