@@ -31,7 +31,7 @@ export function ChangelogButton() {
         onClick={() =>
           setOpen(true)
         }
-        className="fixed bottom-[190px] right-4 z-40 rounded-full border border-blue-500/20 bg-blue-500/10 px-5 py-3 text-sm font-bold text-blue-400 shadow-2xl transition hover:scale-[1.03] active:scale-[0.98]"
+        className="fixed bottom-[240px] right-4 z-40 rounded-full border border-blue-500/20 bg-blue-500/10 px-5 py-3 text-sm font-bold text-blue-400 shadow-2xl transition hover:scale-[1.03] active:scale-[0.98]"
       >
         Updates
       </button>

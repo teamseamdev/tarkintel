@@ -26,7 +26,7 @@ export function AppShell({
         <div className="absolute bottom-[-10%] right-[-10%] h-[500px] w-[500px] rounded-full bg-blue-500/5 blur-3xl" />
       </div>
 
-      <div className="relative z-10 mx-auto flex w-full max-w-[1600px] gap-6 p-4">
+      <div className="relative z-10 mx-auto flex w-full max-w-[1600px] gap-6 p-4 pt-[max(env(safe-area-inset-top),1rem)]">
         {/* Desktop Sidebar */}
         <div className="hidden w-[280px] shrink-0 lg:block">
           <DesktopSidebar />

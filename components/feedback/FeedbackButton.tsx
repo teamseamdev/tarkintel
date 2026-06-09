@@ -153,7 +153,7 @@ export function FeedbackButton() {
           setOpen(true)
         }
         aria-label="Open Feedback"
-        className="fixed bottom-[125px] right-4 z-50 rounded-full border border-primary/30 bg-primary px-5 py-3 text-sm font-bold text-black shadow-2xl transition hover:scale-[1.03] active:scale-[0.98]"
+        className="fixed bottom-[165px] right-4 z-50 rounded-full border border-primary/30 bg-primary px-5 py-3 text-sm font-bold text-black shadow-2xl transition hover:scale-[1.03] active:scale-[0.98]"
       >
         Feedback
       </button>
