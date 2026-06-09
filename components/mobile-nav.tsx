@@ -36,7 +36,7 @@ export function MobileNav() {
   }, [router]);
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur lg:hidden">
+    <div className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur supports-[backdrop-filter]:bg-card/80 lg:hidden">
       <div className="mx-auto flex max-w-lg items-center justify-around px-2 py-3">
         {navigationItems.map(
           (item) => {

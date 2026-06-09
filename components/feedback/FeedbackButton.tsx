@@ -27,13 +27,43 @@ export function FeedbackButton() {
   const [submitted, setSubmitted] =
     useState(false);
 
+  const [errorMessage, setErrorMessage] =
+    useState("");
+
   async function submitFeedback() {
     try {
       if (!message.trim()) {
         return;
       }
 
+      /*
+        RESET
+      */
+
+      setErrorMessage("");
+
       setSubmitting(true);
+
+      /*
+        REQUIRE LOGIN
+      */
+
+      const {
+        data: {
+          session,
+        },
+      } =
+        await supabase.auth.getSession();
+
+      if (!session) {
+        throw new Error(
+          "You must be logged in to submit feedback."
+        );
+      }
+
+      /*
+        PAYLOAD
+      */
 
       const payload = {
         profile_id:
@@ -53,6 +83,10 @@ export function FeedbackButton() {
           window.location.pathname,
       };
 
+      /*
+        INSERT
+      */
+
       const { error } =
         await supabase
           .from(
@@ -61,22 +95,45 @@ export function FeedbackButton() {
           .insert(payload);
 
       if (error) {
+        console.error(
+          "SUPABASE FEEDBACK ERROR:",
+          error
+        );
+
         throw error;
       }
+
+      /*
+        SUCCESS
+      */
 
       setSubmitted(true);
 
       setMessage("");
 
+      /*
+        AUTO CLOSE
+      */
+
       setTimeout(() => {
         setOpen(false);
 
         setSubmitted(false);
+
+        setCategory(
+          "Bug"
+        );
       }, 1500);
     } catch (error) {
       console.error(
         "FEEDBACK ERROR:",
         error
+      );
+
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Failed to submit feedback."
       );
     } finally {
       setSubmitting(false);
@@ -181,6 +238,13 @@ export function FeedbackButton() {
                 className="w-full resize-none rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none transition focus:border-primary"
               />
             </div>
+
+            {/* ERROR */}
+            {errorMessage && (
+              <div className="mt-4 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+                {errorMessage}
+              </div>
+            )}
 
             {/* ACTIONS */}
             <div className="mt-6 flex justify-end">
