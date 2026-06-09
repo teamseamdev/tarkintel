@@ -13,12 +13,13 @@ import { useTaskProgress } from "@/hooks/use-task-progress";
 import { buildProgressionState } from "@/lib/build-progression-state";
 import LoginButton from "@/components/login-button";
 import { getEffectivePlayerLevel } from "@/lib/effective-level";
+
 export default function HomePage() {
   const {
-  completedTasks,
-  loaded,
-  playerLevelOverride,
-} = useTaskProgress();
+    completedTasks,
+    loaded,
+    playerLevelOverride,
+  } = useTaskProgress();
 
   const [tasks, setTasks] =
     useState<any[]>([]);
@@ -28,57 +29,119 @@ export default function HomePage() {
 
   useEffect(() => {
     async function loadTasks() {
-      const response =
-        await fetch(
-          "/api/tasks"
+      try {
+        const response =
+          await fetch(
+            "/api/tasks"
+          );
+
+        const data =
+          await response.json();
+
+        setTasks(data);
+      } catch (error) {
+        console.error(
+          "Failed to load tasks",
+          error
         );
-
-      const data =
-        await response.json();
-
-      setTasks(data);
-
-      setLoading(false);
+      } finally {
+        setLoading(false);
+      }
     }
 
     loadTasks();
   }, []);
 
-const {
-  effectiveLevel,
-} = useMemo(() => {
-  return getEffectivePlayerLevel(
-    tasks,
-    completedTasks,
-    playerLevelOverride
-  );
-}, [
-  tasks,
-  completedTasks,
-  playerLevelOverride,
-]);
-/*
-  PROGRESSION
-*/
-
-const progression =
-  useMemo(() => {
-    return buildProgressionState(
+  const {
+    effectiveLevel,
+  } = useMemo(() => {
+    return getEffectivePlayerLevel(
       tasks,
       completedTasks,
-      effectiveLevel
+      playerLevelOverride
     );
   }, [
     tasks,
     completedTasks,
-    effectiveLevel,
+    playerLevelOverride,
   ]);
+
+  /*
+    PROGRESSION
+  */
+
+  const progression =
+    useMemo(() => {
+      return buildProgressionState(
+        tasks,
+        completedTasks,
+        effectiveLevel
+      );
+    }, [
+      tasks,
+      completedTasks,
+      effectiveLevel,
+    ]);
+
+  /*
+    STABLE LOADING SKELETON
+    Helps reduce CLS massively
+  */
 
   if (!loaded || loading) {
     return (
-      <div className="min-h-screen p-6 text-white">
-        <div className="glass-card rounded-3xl p-6">
-          Loading TarkIntel...
+      <div className="min-h-screen p-6 pb-28 text-white">
+        <div className="flex flex-col gap-6">
+          {/* HERO SKELETON */}
+          <div className="glass-card rounded-[2rem] p-8 min-h-[260px] animate-pulse">
+            <div className="flex justify-end">
+              <div className="h-10 w-40 rounded-full bg-white/10" />
+            </div>
+
+            <div className="mt-6 h-4 w-32 rounded bg-white/10" />
+
+            <div className="mt-6 h-16 w-full max-w-[520px] rounded bg-white/10" />
+
+            <div className="mt-4 h-5 w-full max-w-[420px] rounded bg-white/10" />
+          </div>
+
+          {/* STATS SKELETON */}
+          <div className="grid grid-cols-2 gap-4">
+            {[...Array(4)].map(
+              (_, i) => (
+                <div
+                  key={i}
+                  className="glass-card rounded-[2rem] p-5 min-h-[140px] animate-pulse"
+                >
+                  <div className="h-4 w-28 rounded bg-white/10" />
+
+                  <div className="mt-6 h-10 w-20 rounded bg-white/10" />
+
+                  <div className="mt-4 h-3 w-32 rounded bg-white/10" />
+                </div>
+              )
+            )}
+          </div>
+
+          {/* TASKS SKELETON */}
+          <div className="glass-card rounded-[2rem] p-6 min-h-[520px] animate-pulse">
+            <div className="flex items-center justify-between">
+              <div className="h-6 w-48 rounded bg-white/10" />
+
+              <div className="h-10 w-28 rounded-full bg-white/10" />
+            </div>
+
+            <div className="mt-6 flex flex-col gap-4">
+              {[...Array(5)].map(
+                (_, i) => (
+                  <div
+                    key={i}
+                    className="h-20 rounded-2xl bg-white/[0.03]"
+                  />
+                )
+              )}
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -88,21 +151,23 @@ const progression =
     <div className="min-h-screen p-6 pb-28 text-white">
       <div className="flex flex-col gap-6">
         {/* HERO */}
-        <div className="glass-card relative overflow-hidden rounded-[2rem] p-8">
+        <div className="glass-card relative overflow-hidden rounded-[2rem] p-8 min-h-[260px]">
           <div className="absolute inset-0 bg-gradient-to-br from-[#B8895A]/10 to-transparent" />
 
           <div className="relative z-10">
-  <div className="flex justify-end">
-    <LoginButton />
-  </div>
-            
+            <div className="flex justify-end">
+              <LoginButton />
+            </div>
+
             <p className="text-sm uppercase tracking-[0.3em] text-zinc-500">
               TarkIntel
             </p>
 
             <h1 className="mt-3 text-5xl font-black tracking-tight">
               Escape From Tarkov
+              <br />
               Progression
+              <br />
               Intelligence
             </h1>
 
@@ -115,156 +180,156 @@ const progression =
           </div>
         </div>
 
+        {/* PROGRESSION OVERVIEW */}
+        <div className="grid grid-cols-2 gap-4">
+          {/* Overall Completion */}
+          <div className="glass-card rounded-[2rem] p-5 min-h-[140px]">
+            <p className="text-sm text-zinc-500">
+              Overall Progress
+            </p>
 
-      {/* PROGRESSION OVERVIEW */}
-<div className="grid grid-cols-2 gap-4">
-  {/* Overall Completion */}
-  <div className="glass-card rounded-[2rem] p-5">
-    <p className="text-sm text-zinc-500">
-      Overall Progress
-    </p>
+            <div className="mt-4">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-zinc-400">
+                  Task Completion
+                </span>
 
-    <div className="mt-4">
-      <div className="flex items-center justify-between text-sm">
-        <span className="text-zinc-400">
-          Task Completion
-        </span>
+                <span className="font-semibold text-primary">
+                  {Math.round(
+                    (progression.completed
+                      .length /
+                      tasks.length) *
+                      100
+                  )}
+                  %
+                </span>
+              </div>
 
-        <span className="font-semibold text-primary">
-          {Math.round(
-            (progression.completed
-              .length /
-              tasks.length) *
-              100
-          )}
-          %
-        </span>
-      </div>
-
-      <div className="mt-3 h-3 overflow-hidden rounded-full bg-white/5">
-        <div
-          className="h-full rounded-full bg-gradient-to-r from-[#B8895A] to-[#D4A574]"
-          style={{
-            width: `${
-              (progression
-                .completed
-                .length /
-                tasks.length) *
-              100
-            }%`,
-          }}
-        />
-      </div>
-    </div>
-  </div>
-
-  {/* Kappa */}
-  <div className="glass-card rounded-[2rem] p-5">
-    <p className="text-sm text-zinc-500">
-      Kappa Progress
-    </p>
-
-    {(() => {
-      const kappaTasks =
-        tasks.filter(
-          task =>
-            task.kappaRequired
-        );
-
-      const completedKappa =
-        kappaTasks.filter(
-          task =>
-            completedTasks.includes(
-              task.id
-            )
-        );
-
-      const progress =
-        kappaTasks.length > 0
-          ? (completedKappa.length /
-              kappaTasks.length) *
-            100
-          : 0;
-
-      return (
-        <>
-          <div className="mt-4 flex items-center justify-between text-sm">
-            <span className="text-zinc-400">
-              Collector Path
-            </span>
-
-            <span className="font-semibold text-yellow-400">
-              {Math.round(
-                progress
-              )}
-              %
-            </span>
+              <div className="mt-3 h-3 overflow-hidden rounded-full bg-white/5">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-[#B8895A] to-[#D4A574]"
+                  style={{
+                    width: `${
+                      (progression
+                        .completed
+                        .length /
+                        tasks.length) *
+                      100
+                    }%`,
+                  }}
+                />
+              </div>
+            </div>
           </div>
 
-          <div className="mt-3 h-3 overflow-hidden rounded-full bg-white/5">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-yellow-500 to-amber-300"
-              style={{
-                width: `${progress}%`,
-              }}
-            />
+          {/* Kappa */}
+          <div className="glass-card rounded-[2rem] p-5 min-h-[140px]">
+            <p className="text-sm text-zinc-500">
+              Kappa Progress
+            </p>
+
+            {(() => {
+              const kappaTasks =
+                tasks.filter(
+                  task =>
+                    task.kappaRequired
+                );
+
+              const completedKappa =
+                kappaTasks.filter(
+                  task =>
+                    completedTasks.includes(
+                      task.id
+                    )
+                );
+
+              const progress =
+                kappaTasks.length >
+                0
+                  ? (completedKappa.length /
+                      kappaTasks.length) *
+                    100
+                  : 0;
+
+              return (
+                <>
+                  <div className="mt-4 flex items-center justify-between text-sm">
+                    <span className="text-zinc-400">
+                      Collector Path
+                    </span>
+
+                    <span className="font-semibold text-yellow-400">
+                      {Math.round(
+                        progress
+                      )}
+                      %
+                    </span>
+                  </div>
+
+                  <div className="mt-3 h-3 overflow-hidden rounded-full bg-white/5">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-yellow-500 to-amber-300"
+                      style={{
+                        width: `${progress}%`,
+                      }}
+                    />
+                  </div>
+
+                  <div className="mt-3 text-xs text-zinc-500">
+                    {
+                      completedKappa.length
+                    }{" "}
+                    /{" "}
+                    {
+                      kappaTasks.length
+                    }{" "}
+                    Kappa tasks
+                    completed
+                  </div>
+                </>
+              );
+            })()}
           </div>
 
-          <div className="mt-3 text-xs text-zinc-500">
-            {
-              completedKappa.length
-            }{" "}
-            /{" "}
-            {
-              kappaTasks.length
-            }{" "}
-            Kappa tasks
-            completed
+          {/* Active */}
+          <div className="glass-card rounded-[2rem] p-5 min-h-[140px]">
+            <p className="text-sm text-zinc-500">
+              Active Tasks
+            </p>
+
+            <h2 className="mt-3 text-4xl font-black text-blue-400">
+              {
+                progression.active
+                  .length
+              }
+            </h2>
+
+            <p className="mt-2 text-sm text-zinc-500">
+              Currently available
+            </p>
           </div>
-        </>
-      );
-    })()}
-  </div>
 
-  {/* Active */}
-  <div className="glass-card rounded-[2rem] p-5">
-    <p className="text-sm text-zinc-500">
-      Active Tasks
-    </p>
+          {/* Locked */}
+          <div className="glass-card rounded-[2rem] p-5 min-h-[140px]">
+            <p className="text-sm text-zinc-500">
+              Locked Tasks
+            </p>
 
-    <h2 className="mt-3 text-4xl font-black text-blue-400">
-      {
-        progression.active
-          .length
-      }
-    </h2>
+            <h2 className="mt-3 text-4xl font-black text-red-400">
+              {
+                progression.locked
+                  .length
+              }
+            </h2>
 
-    <p className="mt-2 text-sm text-zinc-500">
-      Currently available
-    </p>
-  </div>
-
-  {/* Locked */}
-  <div className="glass-card rounded-[2rem] p-5">
-    <p className="text-sm text-zinc-500">
-      Locked Tasks
-    </p>
-
-    <h2 className="mt-3 text-4xl font-black text-red-400">
-      {
-        progression.locked
-          .length
-      }
-    </h2>
-
-    <p className="mt-2 text-sm text-zinc-500">
-      Awaiting unlocks
-    </p>
-  </div>
-</div>
+            <p className="mt-2 text-sm text-zinc-500">
+              Awaiting unlocks
+            </p>
+          </div>
+        </div>
 
         {/* ACTIVE TASKS */}
-        <div className="glass-card rounded-[2rem] p-6">
+        <div className="glass-card rounded-[2rem] p-6 min-h-[520px]">
           <div className="mb-5 flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold">
