@@ -4,6 +4,8 @@ import { DesktopSidebar } from "@/components/layout/DesktopSidebar";
 
 import { MobileNav } from "@/components/mobile-nav";
 
+import { FeedbackButton } from "@/components/feedback/FeedbackButton";
+
 interface AppShellProps {
   children: ReactNode;
 }
@@ -24,6 +26,9 @@ export function AppShell({
           {children}
         </main>
       </div>
+
+      {/* GLOBAL FEEDBACK */}
+      <FeedbackButton />
 
       {/* Mobile Navigation */}
       <MobileNav />
