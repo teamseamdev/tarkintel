@@ -18,6 +18,8 @@ import { AppShell } from "@/components/layout/AppShell";
 
 import "@/lib/analytics/posthog";
 
+import { SpeedInsights } from "@vercel/speed-insights/next";
+
 const geistSans = Geist({
   variable:
     "--font-geist-sans",
@@ -203,6 +205,7 @@ export default function RootLayout({
             </AppShell>
           </AuthProvider>
         </PostHogProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
