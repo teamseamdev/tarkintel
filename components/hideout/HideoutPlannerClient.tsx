@@ -66,12 +66,27 @@ export function HideoutPlannerClient({
     COLLAPSE STATE
   */
 
-  const [
-    collapsedModules,
-    setCollapsedModules,
-  ] = useState<
-    Record<string, boolean>
-  >({});
+const [
+  collapsedModules,
+  setCollapsedModules,
+] = useState<
+  Record<string, boolean>
+>(() => {
+  /*
+    COLLAPSED BY DEFAULT
+  */
+
+  return Object.fromEntries(
+    modules.map(
+      (
+        module
+      ) => [
+        module.id,
+        true,
+      ]
+    )
+  );
+});
 
   /*
     HIDE COMPLETED

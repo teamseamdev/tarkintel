@@ -49,7 +49,7 @@ export function MobileNav() {
           </div>
 
           <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-600">
-            v0.1.0
+            v0.1.1
           </p>
         </div>
       </div>

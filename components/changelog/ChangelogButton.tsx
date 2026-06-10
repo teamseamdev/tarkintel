@@ -6,6 +6,19 @@ import {
 
 const changelog = [
   {
+    version: "0.1.1",
+    date: "6/10/26",
+    changes: [
+      "Major backend stability and production hardening improvements",
+      "Improved external API resilience and timeout handling",
+      "Better live data error recovery across Tasks, Items, and Hideout",
+      "Reduced mobile layout shifting and improved loading stability",
+      "Hideout modules now collapse by default for cleaner navigation",
+      "General UI polish and beta stability improvements",
+    ],
+  },
+
+  {
     version: "0.1.0",
     date: "6/9/26",
     changes: [
