@@ -14,6 +14,7 @@ const changelog = [
       "Improved Tarkov.dev timeout handling and API recovery systems",
       "Prevented production crashes from malformed external API responses",
       "Improved loading resilience across Tasks, Items, and Hideout",
+      "Completed Hideout modules can now be hidden for cleaner navigation",
       "Additional UI polish and beta quality-of-life improvements",
     ],
   },

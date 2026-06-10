@@ -66,37 +66,37 @@ export function HideoutPlannerClient({
     COLLAPSE STATE
   */
 
-const [
-  collapsedModules,
-  setCollapsedModules,
-] = useState<
-  Record<string, boolean>
->(() => {
-  /*
-    COLLAPSED BY DEFAULT
-  */
+  const [
+    collapsedModules,
+    setCollapsedModules,
+  ] = useState<
+    Record<string, boolean>
+  >(() => {
+    /*
+      COLLAPSED BY DEFAULT
+    */
 
-  return Object.fromEntries(
-    modules.map(
-      (
-        module
-      ) => [
-        module.id,
-        true,
-      ]
-    )
-  );
-});
+    return Object.fromEntries(
+      modules.map(
+        (
+          module
+        ) => [
+          module.id,
+          true,
+        ]
+      )
+    );
+  });
 
   /*
     HIDE COMPLETED
-    REQUIREMENTS
+    MODULES
   */
 
   const [
-    hideCompletedRequirements,
-    setHideCompletedRequirements,
-  ] = useState(false);
+    hideCompletedModules,
+    setHideCompletedModules,
+  ] = useState(true);
 
   /*
     PERSIST
@@ -105,11 +105,11 @@ const [
   useEffect(() => {
     const stored =
       localStorage.getItem(
-        "hide-completed-requirements"
+        "hide-completed-modules"
       );
 
     if (stored) {
-      setHideCompletedRequirements(
+      setHideCompletedModules(
         stored === "true"
       );
     }
@@ -117,13 +117,13 @@ const [
 
   useEffect(() => {
     localStorage.setItem(
-      "hide-completed-requirements",
+      "hide-completed-modules",
       String(
-        hideCompletedRequirements
+        hideCompletedModules
       )
     );
   }, [
-    hideCompletedRequirements,
+    hideCompletedModules,
   ]);
 
   /*
@@ -139,6 +139,49 @@ const [
           )
       );
     }, [modules]);
+
+  /*
+    FILTERED MODULES
+  */
+
+  const filteredModules =
+    useMemo(() => {
+      return sortedModules.filter(
+        (
+          module
+        ) => {
+          if (
+            !hideCompletedModules
+          ) {
+            return true;
+          }
+
+          const completedLevel =
+            getCompletedLevel(
+              module.id
+            );
+
+          const maxLevel =
+            Math.max(
+              ...module.levels.map(
+                (
+                  level
+                ) =>
+                  level.level
+              )
+            );
+
+          return (
+            completedLevel <
+            maxLevel
+          );
+        }
+      );
+    }, [
+      sortedModules,
+      hideCompletedModules,
+      getCompletedLevel,
+    ]);
 
   /*
     ITEM MAP
@@ -210,26 +253,26 @@ const [
       <div className="flex items-center justify-end">
         <button
           onClick={() =>
-            setHideCompletedRequirements(
+            setHideCompletedModules(
               (prev) =>
                 !prev
             )
           }
           className={`rounded-2xl border px-4 py-3 text-sm font-semibold transition ${
-            hideCompletedRequirements
+            hideCompletedModules
               ? "border-primary/30 bg-primary/10 text-primary"
               : "border-white/10 bg-white/[0.03] text-zinc-400 hover:bg-white/[0.06]"
           }`}
         >
-          {hideCompletedRequirements
-            ? "SHOW COMPLETED REQUIREMENTS"
-            : "HIDE COMPLETED REQUIREMENTS"}
+          {hideCompletedModules
+            ? "SHOW COMPLETED MODULES"
+            : "HIDE COMPLETED MODULES"}
         </button>
       </div>
 
       {/* Modules */}
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-        {sortedModules.map(
+        {filteredModules.map(
           (
             module: HideoutModule
           ) => (
@@ -250,7 +293,7 @@ const [
                 ]
               }
               hideCompletedRequirements={
-                hideCompletedRequirements
+                false
               }
               toggleCollapse={() =>
                 setCollapsedModules(
