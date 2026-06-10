@@ -35,7 +35,7 @@ export function DesktopSidebar() {
           <div className="h-2 w-2 rounded-full bg-emerald-400" />
 
           <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">
-            VERSION 0.1.1
+            VERSION 0.1.2
           </p>
         </div>
       </div>

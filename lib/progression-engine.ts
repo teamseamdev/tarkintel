@@ -479,3 +479,199 @@ export function getUpgradeReadiness({
     blockedBy: [],
   };
 }
+
+export interface RecommendedUpgrade {
+  module: HideoutModule;
+
+  level: HideoutLevel;
+
+  score: number;
+
+  reason: string;
+}
+
+export function getTopRecommendedUpgrades({
+  modules,
+  getCompletedLevel,
+  getTrackedQuantity,
+  items,
+}: {
+  modules: HideoutModule[];
+
+  getCompletedLevel: (
+    moduleId: string
+  ) => number;
+
+  getTrackedQuantity: (
+    itemId: string
+  ) => number;
+
+  items: TarkovItem[];
+}): RecommendedUpgrade[] {
+  const recommendations: RecommendedUpgrade[] =
+    [];
+
+  for (const module of modules) {
+    const completedLevel =
+      getCompletedLevel(
+        module.id
+      );
+
+    const nextLevel =
+      completedLevel + 1;
+
+    const level =
+      module.levels.find(
+        (
+          level
+        ) =>
+          level.level ===
+          nextLevel
+      );
+
+    if (!level) {
+      continue;
+    }
+
+    const readiness =
+      getUpgradeReadiness({
+        module,
+        level,
+        completed: false,
+        getCompletedLevel,
+        getTrackedQuantity,
+        items,
+      });
+
+    /*
+      ONLY SCORE
+      ACTIONABLE UPGRADES
+    */
+
+    if (
+      readiness.status ===
+      "blocked"
+    ) {
+      continue;
+    }
+
+    let score = 0;
+
+    /*
+      BASE SCORE
+    */
+
+    score += 100;
+
+    /*
+      FEWER MISSING ITEMS
+      = BETTER
+    */
+
+    score += Math.max(
+      0,
+      25 -
+        readiness
+          .missingItems
+          .length *
+          5
+    );
+
+    /*
+      HIGH VALUE
+      STATIONS
+    */
+
+    const importantModules =
+      [
+        "Workbench",
+        "Intel Center",
+        "Medstation",
+        "Generator",
+      ];
+
+    if (
+      importantModules.includes(
+        module.name
+      )
+    ) {
+      score += 20;
+    }
+
+    /*
+      FUTURE DEPENDENCIES
+    */
+
+    const futureUnlocks =
+      modules.filter(
+        (
+          candidate
+        ) =>
+          candidate.levels.some(
+            (
+              futureLevel
+            ) =>
+              futureLevel.stationRequirements?.some(
+                (
+                  requirement
+                ) =>
+                  requirement.stationId ===
+                    module.id &&
+                  requirement.level <=
+                    level.level
+              )
+          )
+      ).length;
+
+    score +=
+      futureUnlocks * 10;
+
+    /*
+      READY BONUS
+    */
+
+    if (
+      readiness.status ===
+      "ready"
+    ) {
+      score += 30;
+    }
+
+    /*
+      REASONING
+    */
+
+    let reason =
+      "Strong progression value.";
+
+    if (
+      readiness.status ===
+      "ready"
+    ) {
+      reason =
+        "Ready to upgrade now.";
+    } else if (
+      futureUnlocks > 0
+    ) {
+      reason = `Unlocks ${futureUnlocks} future progression paths.`;
+    }
+
+    recommendations.push({
+      module,
+
+      level,
+
+      score,
+
+      reason,
+    });
+  }
+
+  return recommendations.sort(
+    (
+      a,
+      b
+    ) =>
+      b.score - a.score
+  );
+}

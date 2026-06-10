@@ -10,9 +10,21 @@ import {
 
 import { useTaskProgress } from "@/hooks/use-task-progress";
 
+import { useHideoutProgress } from "@/hooks/useHideoutProgress";
+
 import { buildProgressionState } from "@/lib/build-progression-state";
-import LoginButton from "@/components/login-button";
+
 import { getEffectivePlayerLevel } from "@/lib/effective-level";
+
+import {
+  getTopRecommendedUpgrades,
+} from "@/lib/progression-engine";
+
+import LoginButton from "@/components/login-button";
+
+import {
+  RecommendedUpgradeCard,
+} from "@/components/hideout/RecommendedUpgradeCard";
 
 export default function HomePage() {
   const {
@@ -21,64 +33,124 @@ export default function HomePage() {
     playerLevelOverride,
   } = useTaskProgress();
 
+  const {
+    getCompletedLevel,
+  } = useHideoutProgress();
+
   const [tasks, setTasks] =
     useState<any[]>([]);
+
+  const [
+    hideoutModules,
+    setHideoutModules,
+  ] = useState<any[]>([]);
 
   const [loading, setLoading] =
     useState(true);
 
   useEffect(() => {
-   async function loadTasks() {
-  try {
-    const response =
-      await fetch(
-        "/api/tasks"
-      );
+    async function loadData() {
+      try {
+        /*
+          TASKS
+        */
 
-    if (
-      !response.ok
-    ) {
-      throw new Error(
-        `Failed to load tasks (${response.status})`
-      );
-    }
+        const tasksResponse =
+          await fetch(
+            "/api/tasks"
+          );
 
-    const text =
-      await response.text();
+        if (
+          !tasksResponse.ok
+        ) {
+          throw new Error(
+            `Failed to load tasks (${tasksResponse.status})`
+          );
+        }
 
-    let data;
+        const tasksText =
+          await tasksResponse.text();
 
-    try {
-      data =
-        JSON.parse(
-          text
+        let tasksData;
+
+        try {
+          tasksData =
+            JSON.parse(
+              tasksText
+            );
+        } catch {
+          throw new Error(
+            "Invalid tasks JSON response"
+          );
+        }
+
+        setTasks(
+          Array.isArray(
+            tasksData
+          )
+            ? tasksData
+            : []
         );
-    } catch {
-      throw new Error(
-        "Invalid tasks JSON response"
-      );
+
+        /*
+          HIDEOUT
+        */
+
+        const hideoutResponse =
+          await fetch(
+            "/api/hideout"
+          );
+
+        if (
+          !hideoutResponse.ok
+        ) {
+          throw new Error(
+            `Failed to load hideout (${hideoutResponse.status})`
+          );
+        }
+
+        const hideoutText =
+          await hideoutResponse.text();
+
+        let hideoutData;
+
+        try {
+          hideoutData =
+            JSON.parse(
+              hideoutText
+            );
+        } catch {
+          throw new Error(
+            "Invalid hideout JSON response"
+          );
+        }
+
+       setHideoutModules(
+  Array.isArray(
+    hideoutData
+  )
+    ? hideoutData
+    : Array.isArray(
+        hideoutData?.fallback
+      )
+    ? hideoutData.fallback
+    : []
+);
+      } catch (error) {
+        console.error(
+          "Failed to load homepage data",
+          error
+        );
+
+        setTasks([]);
+
+        setHideoutModules([]);
+      } finally {
+        setLoading(false);
+      }
     }
 
-    setTasks(
-      Array.isArray(
-        data
-      )
-        ? data
-        : []
-    );
-  } catch (error) {
-    console.error(
-      "Failed to load tasks",
-      error
-    );
-
-    setTasks([]);
-  } finally {
-    setLoading(false);
-  }
-}
-
-    loadTasks();
+    loadData();
   }, []);
 
   const {
@@ -111,6 +183,37 @@ export default function HomePage() {
       completedTasks,
       effectiveLevel,
     ]);
+
+/*
+  NEXT BEST ACTION
+*/
+
+const recommendedUpgrade =
+  getTopRecommendedUpgrades({
+    modules:
+      Array.isArray(
+        hideoutModules
+      )
+        ? hideoutModules
+        : [],
+
+    getCompletedLevel,
+
+    /*
+      TEMP PLACEHOLDER
+      UNTIL ITEM TRACKING
+      IS CONNECTED
+    */
+    getTrackedQuantity:
+      () => 0,
+
+    /*
+      TEMP EMPTY ITEMS
+      UNTIL LIVE ITEMS
+      ARE CONNECTED
+    */
+    items: [],
+  })?.[0] || null;
 
   /*
     STABLE LOADING SKELETON
@@ -354,6 +457,28 @@ export default function HomePage() {
             <p className="mt-2 text-sm text-zinc-500">
               Awaiting unlocks
             </p>
+          </div>
+        </div>
+
+        {/* NEXT BEST ACTION */}
+        <div className="relative overflow-hidden rounded-[2rem]">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#B8895A]/10 to-transparent" />
+
+          <div className="relative z-10">
+            <RecommendedUpgradeCard
+              upgrade={
+                recommendedUpgrade
+              }
+            />
+
+            <div className="mt-4 flex justify-end">
+              <Link
+                href="/hideout"
+                className="rounded-full bg-primary px-5 py-3 text-sm font-semibold text-black transition-all duration-300 hover:scale-[1.02]"
+              >
+                Open Hideout
+              </Link>
+            </div>
           </div>
         </div>
 

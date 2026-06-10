@@ -55,9 +55,12 @@ export async function tarkovDevQuery(
       const errorText =
         await response.text();
 
-      throw new Error(
-        `Tarkov.dev request failed (${response.status}): ${errorText}`
+      console.error(
+        `TARKOV.DEV HTTP ERROR (${response.status}):`,
+        errorText
       );
+
+      return null;
     }
 
     /*
@@ -83,9 +86,7 @@ export async function tarkovDevQuery(
         text
       );
 
-      throw new Error(
-        "Invalid JSON response from Tarkov.dev"
-      );
+      return null;
     }
 
     /*
@@ -98,6 +99,10 @@ export async function tarkovDevQuery(
         json.errors
       );
     }
+
+    /*
+      SAFE DATA
+    */
 
     return (
       json.data || {}
@@ -115,9 +120,7 @@ export async function tarkovDevQuery(
         "TARKOV.DEV REQUEST TIMEOUT"
       );
 
-      throw new Error(
-        "Tarkov.dev request timed out"
-      );
+      return null;
     }
 
     /*
@@ -129,7 +132,7 @@ export async function tarkovDevQuery(
       error
     );
 
-    throw error;
+    return null;
   } finally {
     clearTimeout(
       timeout

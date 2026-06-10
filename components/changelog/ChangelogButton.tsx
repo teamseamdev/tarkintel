@@ -6,6 +6,19 @@ import {
 
 const changelog = [
   {
+    version: "0.1.2",
+    date: "6/10/26",
+    changes: [
+      "Introduced TarkIntel Next Best Action recommendation system",
+      "Homepage now surfaces recommended hideout upgrades dynamically",
+      "Improved Tarkov.dev timeout handling and API recovery systems",
+      "Prevented production crashes from malformed external API responses",
+      "Improved loading resilience across Tasks, Items, and Hideout",
+      "Additional UI polish and beta quality-of-life improvements",
+    ],
+  },
+
+  {
     version: "0.1.1",
     date: "6/10/26",
     changes: [
