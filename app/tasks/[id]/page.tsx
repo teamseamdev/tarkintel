@@ -46,25 +46,58 @@ export default function TaskPage() {
 
   useEffect(() => {
     async function loadTasks() {
-      try {
-        const response =
-          await fetch(
-            "/api/tasks"
-          );
+  try {
+    const response =
+      await fetch(
+        "/api/tasks"
+      );
 
-        const data =
-          await response.json();
-
-        setTasks(data);
-      } catch (error) {
-        console.error(
-          "FAILED TO LOAD TASKS:",
-          error
-        );
-      } finally {
-        setLoading(false);
-      }
+    if (
+      !response.ok
+    ) {
+      throw new Error(
+        `Failed to load tasks (${response.status})`
+      );
     }
+
+    const text =
+      await response.text();
+
+    let data;
+
+    try {
+      data =
+        JSON.parse(
+          text
+        );
+    } catch {
+      throw new Error(
+        "Invalid task JSON response"
+      );
+    }
+
+    setTasks(
+      Array.isArray(
+        data
+      )
+        ? data
+        : []
+    );
+  } catch (error) {
+    console.error(
+      "FAILED TO LOAD TASKS:",
+      error
+    );
+
+    /*
+      FAIL SAFE
+    */
+
+    setTasks([]);
+  } finally {
+    setLoading(false);
+  }
+}
 
     loadTasks();
   }, []);

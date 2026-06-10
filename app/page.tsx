@@ -28,26 +28,55 @@ export default function HomePage() {
     useState(true);
 
   useEffect(() => {
-    async function loadTasks() {
-      try {
-        const response =
-          await fetch(
-            "/api/tasks"
-          );
+   async function loadTasks() {
+  try {
+    const response =
+      await fetch(
+        "/api/tasks"
+      );
 
-        const data =
-          await response.json();
-
-        setTasks(data);
-      } catch (error) {
-        console.error(
-          "Failed to load tasks",
-          error
-        );
-      } finally {
-        setLoading(false);
-      }
+    if (
+      !response.ok
+    ) {
+      throw new Error(
+        `Failed to load tasks (${response.status})`
+      );
     }
+
+    const text =
+      await response.text();
+
+    let data;
+
+    try {
+      data =
+        JSON.parse(
+          text
+        );
+    } catch {
+      throw new Error(
+        "Invalid tasks JSON response"
+      );
+    }
+
+    setTasks(
+      Array.isArray(
+        data
+      )
+        ? data
+        : []
+    );
+  } catch (error) {
+    console.error(
+      "Failed to load tasks",
+      error
+    );
+
+    setTasks([]);
+  } finally {
+    setLoading(false);
+  }
+}
 
     loadTasks();
   }, []);
