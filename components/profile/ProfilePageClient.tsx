@@ -37,18 +37,8 @@ export function ProfilePageClient({
     loaded,
   } = useTaskProgress();
 
-  /*
-    SAFE TASKS
-  */
-
   const safeCompletedTasks =
     completedTasks || [];
-
-  /*
-    ANALYTICS
-    MUST ALWAYS RUN
-    BEFORE RETURNS
-  */
 
   const kappaProgress =
     useMemo(() => {
@@ -83,10 +73,6 @@ export function ProfilePageClient({
       safeCompletedTasks,
     ]);
 
-  /*
-    LOADING
-  */
-
   if (!loaded) {
     return (
       <div className="min-h-screen p-4 pb-8 text-white">
@@ -103,10 +89,6 @@ export function ProfilePageClient({
       </div>
     );
   }
-
-  /*
-    AUTH
-  */
 
   if (!user || !profile) {
     return (
@@ -184,7 +166,6 @@ export function ProfilePageClient({
               <LoginButton />
             </div>
 
-            {/* Stats */}
             <div className="grid grid-cols-3 gap-3">
               <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
                 <p className="text-xs uppercase tracking-wide text-zinc-500">
@@ -274,113 +255,130 @@ export function ProfilePageClient({
           </div>
         </div>
 
-        {/* Trader Progress */}
-        <div className="glass-card rounded-[2rem] p-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-black">
-                Trader Progress
-              </h2>
+        {/* Scrollable Analytics */}
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+          {/* Trader Progress */}
+          <div className="glass-card rounded-[2rem] p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-black">
+                  Trader Progress
+                </h2>
 
-              <p className="mt-1 text-sm text-zinc-500">
-                Progression analytics
-                by trader
-              </p>
+                <p className="mt-1 text-sm text-zinc-500">
+                  Progression analytics
+                  by trader
+                </p>
+              </div>
+
+              <div className="rounded-full bg-blue-500/15 px-4 py-2 text-xs font-semibold text-blue-400">
+                {
+                  traderProgress.length
+                }{" "}
+                TRADERS
+              </div>
             </div>
-          </div>
 
-          <div className="mt-6 flex flex-col gap-4">
-            {traderProgress.map(
-              (trader) => (
-                <div
-                  key={trader.trader}
-                  className="rounded-2xl border border-white/5 bg-white/[0.03] p-4"
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-lg font-bold">
-                        {
-                          trader.trader
-                        }
-                      </h3>
-
-                      <p className="mt-1 text-sm text-zinc-500">
-                        {
-                          trader.completed
-                        }
-                        /
-                        {trader.total}{" "}
-                        Tasks
-                      </p>
-                    </div>
-
-                    <div className="rounded-full bg-blue-500/15 px-3 py-1 text-xs font-semibold text-blue-400">
-                      {
-                        trader.percentage
-                      }
-                      %
-                    </div>
-                  </div>
-
-                  <div className="mt-4 h-3 overflow-hidden rounded-full bg-black/40">
+            <div className="mt-6 max-h-[520px] overflow-y-auto pr-2 custom-scrollbar">
+              <div className="flex flex-col gap-4">
+                {traderProgress.map(
+                  (trader) => (
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-blue-500 to-blue-300 transition-all duration-500"
-                      style={{
-                        width: `${trader.percentage}%`,
-                      }}
-                    />
-                  </div>
-                </div>
-              )
-            )}
+                      key={trader.trader}
+                      className="rounded-2xl border border-white/5 bg-white/[0.03] p-4"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-lg font-bold">
+                            {
+                              trader.trader
+                            }
+                          </h3>
+
+                          <p className="mt-1 text-sm text-zinc-500">
+                            {
+                              trader.completed
+                            }
+                            /
+                            {trader.total}{" "}
+                            Tasks
+                          </p>
+                        </div>
+
+                        <div className="rounded-full bg-blue-500/15 px-3 py-1 text-xs font-semibold text-blue-400">
+                          {
+                            trader.percentage
+                          }
+                          %
+                        </div>
+                      </div>
+
+                      <div className="mt-4 h-3 overflow-hidden rounded-full bg-black/40">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-blue-500 to-blue-300 transition-all duration-500"
+                          style={{
+                            width: `${trader.percentage}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )
+                )}
+              </div>
+            </div>
           </div>
-        </div>
 
-        {/* Remaining Kappa */}
-        <div className="glass-card rounded-[2rem] p-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-black">
-                Remaining Kappa
-                Tasks
-              </h2>
+          {/* Remaining Kappa */}
+          <div className="glass-card rounded-[2rem] p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-black">
+                  Remaining Kappa
+                  Tasks
+                </h2>
 
-              <p className="mt-1 text-sm text-zinc-500">
-                Endgame progression
-                objectives
-              </p>
+                <p className="mt-1 text-sm text-zinc-500">
+                  Endgame progression
+                  objectives
+                </p>
+              </div>
+
+              <div className="rounded-full bg-yellow-500/15 px-4 py-2 text-xs font-semibold text-yellow-400">
+                {
+                  remainingKappaTasks.length
+                }{" "}
+                LEFT
+              </div>
             </div>
 
-            <div className="rounded-full bg-yellow-500/15 px-4 py-2 text-xs font-semibold text-yellow-400">
-              ENDGAME
+            <div className="mt-6 max-h-[520px] overflow-y-auto pr-2 custom-scrollbar">
+              <div className="flex flex-col gap-3">
+                {remainingKappaTasks.map(
+                  (task) => (
+                    <div
+                      key={task.id}
+                      className="glass-hover rounded-2xl border border-white/5 bg-white/[0.03] p-4"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="font-semibold">
+                            {task.name}
+                          </h3>
+
+                          <p className="mt-1 text-sm text-zinc-500">
+                            {task.trader}
+                          </p>
+                        </div>
+
+                        <div className="rounded-full bg-yellow-500/15 px-3 py-1 text-xs font-semibold text-yellow-400">
+                          KAPPA
+                        </div>
+                      </div>
+                    </div>
+                  )
+                )}
+              </div>
             </div>
-          </div>
-
-          <div className="mt-6 flex flex-col gap-3">
-            {remainingKappaTasks
-              .slice(0, 10)
-              .map((task) => (
-                <div
-                  key={task.id}
-                  className="glass-hover rounded-2xl border border-white/5 bg-white/[0.03] p-4"
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-semibold">
-                        {task.name}
-                      </h3>
-
-                      <p className="mt-1 text-sm text-zinc-500">
-                        {task.trader}
-                      </p>
-                    </div>
-
-                    <div className="rounded-full bg-yellow-500/15 px-3 py-1 text-xs font-semibold text-yellow-400">
-                      KAPPA
-                    </div>
-                  </div>
-                </div>
-              ))}
           </div>
         </div>
       </div>
