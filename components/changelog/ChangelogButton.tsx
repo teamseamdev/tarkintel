@@ -5,6 +5,20 @@ import {
 } from "react";
 
 const changelog = [
+{
+  version: "0.1.3",
+  date: "6/10/26",
+  changes: [
+    "Completely redesigned mobile navigation with a new top-mounted hamburger menu",
+    "Removed the persistent bottom navigation bar to maximize usable screen space",
+    "Moved Feedback and Updates into the mobile navigation experience",
+    "Desktop now retains floating Feedback and Updates buttons while mobile uses menu shortcuts",
+    "Improved Hideout usability with cleaner module management and completion filtering",
+    "Additional mobile-first UI refinements across the application",
+    "General beta polish, navigation improvements, and quality-of-life updates",
+  ],
+},
+  
   {
     version: "0.1.2",
     date: "6/10/26",
