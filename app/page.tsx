@@ -125,17 +125,17 @@ export default function HomePage() {
           );
         }
 
-       setHideoutModules(
-  Array.isArray(
-    hideoutData
-  )
-    ? hideoutData
-    : Array.isArray(
-        hideoutData?.fallback
-      )
-    ? hideoutData.fallback
-    : []
-);
+        setHideoutModules(
+          Array.isArray(
+            hideoutData
+          )
+            ? hideoutData
+            : Array.isArray(
+                hideoutData?.fallback
+              )
+            ? hideoutData.fallback
+            : []
+        );
       } catch (error) {
         console.error(
           "Failed to load homepage data",
@@ -184,36 +184,36 @@ export default function HomePage() {
       effectiveLevel,
     ]);
 
-/*
-  NEXT BEST ACTION
-*/
+  /*
+    NEXT BEST ACTION
+  */
 
-const recommendedUpgrade =
-  getTopRecommendedUpgrades({
-    modules:
-      Array.isArray(
-        hideoutModules
-      )
-        ? hideoutModules
-        : [],
+  const recommendedUpgrade =
+    getTopRecommendedUpgrades({
+      modules:
+        Array.isArray(
+          hideoutModules
+        )
+          ? hideoutModules
+          : [],
 
-    getCompletedLevel,
+      getCompletedLevel,
 
-    /*
-      TEMP PLACEHOLDER
-      UNTIL ITEM TRACKING
-      IS CONNECTED
-    */
-    getTrackedQuantity:
-      () => 0,
+      /*
+        TEMP PLACEHOLDER
+        UNTIL ITEM TRACKING
+        IS CONNECTED
+      */
+      getTrackedQuantity:
+        () => 0,
 
-    /*
-      TEMP EMPTY ITEMS
-      UNTIL LIVE ITEMS
-      ARE CONNECTED
-    */
-    items: [],
-  })?.[0] || null;
+      /*
+        TEMP EMPTY ITEMS
+        UNTIL LIVE ITEMS
+        ARE CONNECTED
+      */
+      items: [],
+    })?.[0] || null;
 
   /*
     STABLE LOADING SKELETON
@@ -461,26 +461,28 @@ const recommendedUpgrade =
         </div>
 
         {/* NEXT BEST ACTION */}
-        <div className="relative overflow-hidden rounded-[2rem]">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#B8895A]/10 to-transparent" />
+        {recommendedUpgrade && (
+          <div className="relative overflow-hidden rounded-[2rem]">
+            <div className="absolute inset-0 bg-gradient-to-br from-[#B8895A]/10 to-transparent" />
 
-          <div className="relative z-10">
-            <RecommendedUpgradeCard
-              upgrade={
-                recommendedUpgrade
-              }
-            />
+            <div className="relative z-10">
+              <RecommendedUpgradeCard
+                upgrade={
+                  recommendedUpgrade
+                }
+              />
 
-            <div className="mt-4 flex justify-end">
-              <Link
-                href="/hideout"
-                className="rounded-full bg-primary px-5 py-3 text-sm font-semibold text-black transition-all duration-300 hover:scale-[1.02]"
-              >
-                Open Hideout
-              </Link>
+              <div className="mt-4 flex justify-end">
+                <Link
+                  href="/hideout"
+                  className="rounded-full bg-primary px-5 py-3 text-sm font-semibold text-black transition-all duration-300 hover:scale-[1.02]"
+                >
+                  Open Hideout
+                </Link>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* ACTIVE TASKS */}
         <div className="glass-card rounded-[2rem] p-6 min-h-[520px]">

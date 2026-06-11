@@ -95,7 +95,7 @@ export function MobileNav() {
             </Link>
 
             <div className="rounded-full bg-primary/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-primary">
-              Beta v0.1.3
+              BETA
             </div>
           </div>
 
