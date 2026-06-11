@@ -47,10 +47,13 @@ export function AppShell({
       </div>
 
       {/* GLOBAL CHANGELOG */}
-      <ChangelogButton />
+      <div className="hidden lg:block">
+  <ChangelogButton />
+</div>
 
-      {/* GLOBAL FEEDBACK */}
-      <FeedbackButton />
+<div className="hidden lg:block">
+  <FeedbackButton />
+</div>
     </div>
   );
 }
