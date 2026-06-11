@@ -89,7 +89,7 @@ export function ProfilePageClient({
 
   if (!loaded) {
     return (
-      <div className="min-h-screen p-4 pb-28 text-white">
+      <div className="min-h-screen p-4 pb-8 text-white">
         <div className="glass-card rounded-[2rem] p-6">
           <h1 className="text-2xl font-black">
             Loading Profile...
@@ -110,7 +110,7 @@ export function ProfilePageClient({
 
   if (!user || !profile) {
     return (
-      <div className="min-h-screen p-4 pb-28 text-white">
+      <div className="min-h-screen p-4 pb-8 text-white">
         <div className="glass-card rounded-[2rem] p-8 text-center">
           <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-primary/20 bg-primary/10 text-4xl">
             🔒
@@ -137,7 +137,7 @@ export function ProfilePageClient({
   }
 
   return (
-    <div className="min-h-screen p-4 pb-28 text-white">
+    <div className="min-h-screen p-4 pb-8 text-white">
       <div className="flex flex-col gap-6">
         {/* Hero */}
         <div className="relative overflow-hidden rounded-[2rem] glass-card p-6">

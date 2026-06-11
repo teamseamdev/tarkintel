@@ -222,7 +222,7 @@ const recommendedUpgrade =
 
   if (!loaded || loading) {
     return (
-      <div className="min-h-screen p-6 pb-28 text-white">
+      <div className="min-h-screen p-6 pb-8 text-white">
         <div className="flex flex-col gap-6">
           {/* HERO SKELETON */}
           <div className="glass-card rounded-[2rem] p-8 min-h-[260px] animate-pulse">
@@ -280,7 +280,7 @@ const recommendedUpgrade =
   }
 
   return (
-    <div className="min-h-screen p-6 pb-28 text-white">
+    <div className="min-h-screen p-6 pb-8 text-white">
       <div className="flex flex-col gap-6">
         {/* HERO */}
         <div className="glass-card relative overflow-hidden rounded-[2rem] p-8 min-h-[260px]">

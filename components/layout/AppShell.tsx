@@ -33,12 +33,17 @@ export function AppShell({
         </div>
 
         {/* Main Content */}
-        <main className="min-w-0 flex-1">
-          {/* BETA BANNER */}
-          <BetaBanner />
+        <div className="min-w-0 flex-1">
+          {/* MOBILE HEADER */}
+          <MobileNav />
 
-          {children}
-        </main>
+          <main>
+            {/* BETA BANNER */}
+            <BetaBanner />
+
+            {children}
+          </main>
+        </div>
       </div>
 
       {/* GLOBAL CHANGELOG */}
@@ -46,9 +51,6 @@ export function AppShell({
 
       {/* GLOBAL FEEDBACK */}
       <FeedbackButton />
-
-      {/* Mobile Navigation */}
-      <MobileNav />
     </div>
   );
 }

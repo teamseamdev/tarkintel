@@ -9,7 +9,13 @@ import {
 
 import {
   useEffect,
+  useState,
 } from "react";
+
+import {
+  Menu,
+  X,
+} from "lucide-react";
 
 import {
   navigationItems,
@@ -22,10 +28,10 @@ export function MobileNav() {
   const router =
     useRouter();
 
-  /*
-    PREFETCH
-    IMPORTANT ROUTES
-  */
+  const [
+    open,
+    setOpen,
+  ] = useState(false);
 
   useEffect(() => {
     for (const item of navigationItems) {
@@ -35,65 +41,91 @@ export function MobileNav() {
     }
   }, [router]);
 
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 border-t border-white/5 bg-[#0B0E12]/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl supports-[backdrop-filter]:bg-[#0B0E12]/80 lg:hidden">
-      {/* Beta Bar */}
-      <div className="border-b border-white/5 px-4 py-2">
-        <div className="mx-auto flex max-w-lg items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="h-2 w-2 rounded-full bg-emerald-400" />
+    <div className="sticky top-0 z-50 border-b border-white/5 bg-[#0B0E12]/95 backdrop-blur-xl supports-[backdrop-filter]:bg-[#0B0E12]/80 lg:hidden">
+      <div className="flex items-center justify-between px-4 py-3">
+        <button
+          onClick={() =>
+            setOpen(
+              (prev) =>
+                !prev
+            )
+          }
+          className="rounded-2xl border border-white/10 bg-white/[0.03] p-3 text-white"
+          aria-label="Toggle menu"
+        >
+          {open ? (
+            <X size={22} />
+          ) : (
+            <Menu size={22} />
+          )}
+        </button>
 
-            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-primary">
-              TarkIntel Public Beta
-            </p>
-          </div>
+        <Link
+          href="/"
+          className="text-lg font-black tracking-tight text-white"
+        >
+          TarkIntel
+        </Link>
 
-          <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-600">
-            v0.1.2
-          </p>
+        <div className="rounded-full bg-primary/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-primary">
+          Beta
         </div>
       </div>
 
-      {/* Navigation */}
-      <div className="mx-auto flex max-w-lg items-center justify-around px-2 py-3">
-        {navigationItems.map(
-          (item) => {
-            const Icon =
-              item.icon;
+      {open && (
+        <div className="border-t border-white/5 px-4 pb-4">
+          <div className="mt-3 grid gap-2">
+            {navigationItems.map(
+              (item) => {
+                const Icon =
+                  item.icon;
 
-            const isActive =
-              pathname ===
-              item.href;
+                const isActive =
+                  pathname ===
+                  item.href;
 
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                prefetch={true}
-                className={`relative flex min-w-[64px] flex-col items-center gap-1 rounded-2xl px-3 py-2 transition-all duration-300 ${
-                  isActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-zinc-500 hover:bg-white/[0.03] hover:text-white"
-                }`}
-              >
-                {/* Active Glow */}
-                {isActive && (
-                  <div className="absolute inset-0 rounded-2xl border border-primary/20" />
-                )}
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    prefetch={true}
+                    className={`flex items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-semibold transition ${
+                      isActive
+                        ? "border-primary/30 bg-primary/10 text-primary"
+                        : "border-white/5 bg-white/[0.03] text-zinc-400 hover:bg-white/[0.06] hover:text-white"
+                    }`}
+                  >
+                    <Icon size={20} />
 
-                <Icon
-                  size={22}
-                  className="relative z-10"
-                />
+                    <span>
+                      {item.label}
+                    </span>
+                  </Link>
+                );
+              }
+            )}
+          </div>
 
-                <span className="relative z-10 text-[11px] font-semibold">
-                  {item.label}
-                </span>
-              </Link>
-            );
-          }
-        )}
-      </div>
+          <div className="mt-4 flex items-center justify-between rounded-2xl border border-white/5 bg-white/[0.03] px-4 py-3">
+            <div className="flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-emerald-400" />
+
+              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-primary">
+                Public Beta
+              </p>
+            </div>
+
+            <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-600">
+              v0.1.2
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -19,7 +19,7 @@ export default async function LiveItemsPage() {
     await getLiveItems();
 
   return (
-    <div className="min-h-screen p-4 pb-28 text-white">
+    <div className="min-h-screen p-4 pb-8 text-white">
       <div className="flex flex-col gap-4">
         {/* Header */}
         <div className="glass-card rounded-[2rem] p-6">

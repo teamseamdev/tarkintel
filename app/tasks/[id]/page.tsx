@@ -214,7 +214,7 @@ const {
       ?.length;
 
   return (
-    <div className="min-h-screen p-4 pb-28 text-white">
+    <div className="min-h-screen p-4 pb-8 text-white">
       <div className="mx-auto flex max-w-5xl flex-col gap-6">
         {/* HERO */}
         <div className="glass-card relative overflow-hidden rounded-[2rem] p-8">

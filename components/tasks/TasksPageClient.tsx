@@ -308,7 +308,7 @@ const {
     progression.completed.length;
 
   return (
-    <div className="min-h-screen p-4 pb-28 text-white">
+    <div className="min-h-screen p-4 pb-8 text-white">
       <div className="flex flex-col gap-6">
         {/* Header */}
         <div className="relative overflow-hidden rounded-[2rem] glass-card p-6">
