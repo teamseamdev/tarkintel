@@ -6,6 +6,18 @@ import {
 
 const changelog = [
 {
+  version: "0.1.4",
+  date: "6/12/26",
+  changes: [
+   "Fixed auth issue causing profile page to not synce across mobile & web",
+   "Added persisitant status to menu bar on top for mobile",
+   "Additional mobile-first UI refinements across the application",
+    "General beta polish, navigation improvements, and quality-of-life updates",
+  
+  ],
+},
+
+  {
   version: "0.1.3",
   date: "6/10/26",
   changes: [

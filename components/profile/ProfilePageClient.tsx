@@ -30,6 +30,8 @@ export function ProfilePageClient({
   const {
     user,
     profile,
+    loading:
+      authLoading,
   } = useAuth();
 
   const {
@@ -73,7 +75,15 @@ export function ProfilePageClient({
       safeCompletedTasks,
     ]);
 
-  if (!loaded) {
+  /*
+    WAIT FOR BOTH AUTH
+    AND PROGRESSION DATA
+  */
+
+  if (
+    authLoading ||
+    !loaded
+  ) {
     return (
       <div className="min-h-screen p-4 pb-8 text-white">
         <div className="glass-card rounded-[2rem] p-6">
