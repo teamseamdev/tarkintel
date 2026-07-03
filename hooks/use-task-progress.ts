@@ -10,6 +10,7 @@ import { useAuth } from "@/components/auth-provider";
 import {
   loadTaskProgress,
   saveTaskProgress,
+  saveTaskProgressBulk,
 } from "@/lib/task-progress-sync";
 
 const STORAGE_KEY =
@@ -273,6 +274,37 @@ export function useTaskProgress() {
     }
   }
 
+  async function completeTasks(
+    taskIds: string[]
+  ): Promise<void> {
+    const uniqueTaskIds = Array.from(
+      new Set(taskIds.filter(Boolean))
+    );
+    const newTaskIds = uniqueTaskIds.filter(
+      (taskId) => !completedTasks.includes(taskId)
+    );
+
+    if (newTaskIds.length === 0) {
+      return;
+    }
+
+    if (profile?.id) {
+      await saveTaskProgressBulk(
+        profile.id,
+        newTaskIds
+      );
+    }
+
+    setCompletedTasks((previousTasks) =>
+      Array.from(
+        new Set([
+          ...previousTasks,
+          ...newTaskIds,
+        ])
+      )
+    );
+  }
+
   function isTaskCompleted(
     taskId: string
   ) {
@@ -285,6 +317,8 @@ export function useTaskProgress() {
     completedTasks,
 
     toggleTask,
+
+    completeTasks,
 
     isTaskCompleted,
 

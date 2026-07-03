@@ -4,6 +4,10 @@ import {
   useMemo,
 } from "react";
 
+import Link from "next/link";
+
+import { ArrowRight, Sparkles } from "lucide-react";
+
 import { useAuth } from "@/components/auth-provider";
 
 import LoginButton from "@/components/login-button";
@@ -214,6 +218,36 @@ export function ProfilePageClient({
                 </h2>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Catch-Up Setup */}
+        <div className="glass-card rounded-[2rem] p-5">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 gap-4">
+              <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/15 text-primary">
+                <Sparkles className="size-6" />
+              </div>
+
+              <div>
+                <h2 className="text-xl font-black sm:text-2xl">
+                  New to TarkIntel but already mid-wipe?
+                </h2>
+
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
+                  Use Catch-Up Setup to quickly mark completed prerequisite
+                  tasks based on quests you are currently working on.
+                </p>
+              </div>
+            </div>
+
+            <Link
+              href="/profile/catch-up"
+              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-black"
+            >
+              Start Catch-Up Setup
+              <ArrowRight className="size-4" />
+            </Link>
           </div>
         </div>
 

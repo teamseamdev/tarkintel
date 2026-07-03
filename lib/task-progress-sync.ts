@@ -81,3 +81,40 @@ export async function saveTaskProgress(
     data
   );
 }
+
+export async function saveTaskProgressBulk(
+  profileId: string,
+  taskIds: string[]
+) {
+  const uniqueTaskIds = Array.from(
+    new Set(taskIds.filter(Boolean))
+  );
+
+  if (uniqueTaskIds.length === 0) {
+    return;
+  }
+
+  const completedAt = new Date().toISOString();
+  const { error } = await supabase
+    .from("task_progress")
+    .upsert(
+      uniqueTaskIds.map((taskId) => ({
+        profile_id: profileId,
+        task_id: taskId,
+        completed: true,
+        completed_at: completedAt,
+      })),
+      {
+        onConflict: "profile_id,task_id",
+      }
+    );
+
+  if (error) {
+    console.error(
+      "BULK SAVE TASK PROGRESS ERROR:",
+      error
+    );
+
+    throw error;
+  }
+}

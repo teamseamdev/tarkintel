@@ -5,14 +5,26 @@ import {
 } from "react";
 
 const changelog = [
+ {
+  version: "0.1.5",
+  date: "7/3/26",
+  changes: [
+    "Added Catch-Up Setup for mid-wipe players to quickly mark prerequisite task chains complete",
+    "Added bulk task completion support for faster progression setup",
+    "Added profile entry point for Catch-Up Setup",
+    "Improved onboarding flow for players who are new to TarkIntel but already progressed in-game",
+    "Additional mobile-first UI refinements across the application",
+    "General beta polish, navigation improvements, and quality-of-life updates",
+  ],
+},
 {
   version: "0.1.4",
   date: "6/12/26",
   changes: [
-   "Fixed auth issue causing profile page to not synce across mobile & web",
+   "Fixed auth issue causing profile page to not sync across mobile & web",
    "Added persisitant status to menu bar on top for mobile",
    "Additional mobile-first UI refinements across the application",
-    "General beta polish, navigation improvements, and quality-of-life updates",
+   "General beta polish, navigation improvements, and quality-of-life updates",
   
   ],
 },
